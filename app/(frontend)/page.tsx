@@ -1,7 +1,16 @@
 import { cn } from 'lib/utils'
+import { redirect } from 'next/navigation'
 import Avatar from './avatar'
+import { isPayloadBootstrapped } from './db/bootstrap'
 
-export default function Page() {
+export const dynamic = 'force-dynamic'
+
+export default async function Page() {
+  const ready = await isPayloadBootstrapped()
+  if (!ready) {
+    redirect('/setup')
+  }
+
   const currentYear = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Shanghai',
     year: 'numeric',

@@ -1,0 +1,16 @@
+.git
+.github
+.next
+node_modules
+coverage
+.turbo
+.vscode
+.idea
+.DS_Store
+payload.db
+payload.db-shm
+payload.db-wal
+data
+.env
+.env.*
+*.log

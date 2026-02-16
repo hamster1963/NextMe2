@@ -1,0 +1,18 @@
+services:
+  blog:
+    image: ${IMAGE:-ghcr.io/hamster1963/nextme2:latest}
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3052}:3052"
+    environment:
+      NODE_ENV: production
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:-dev-payload-secret}
+      PREVIEW_SECRET: ${PREVIEW_SECRET:-dev-payload-secret}
+      DATABASE_URI: ${DATABASE_URI:-file:/app/data/payload.db}
+      PAYLOAD_DB_PUSH: ${PAYLOAD_DB_PUSH:-true}
+      PAYLOADCMS_COLLECTION: ${PAYLOADCMS_COLLECTION:-posts}
+      PAYLOADCMS_DEPTH: ${PAYLOADCMS_DEPTH:-2}
+      PAYLOADCMS_PAGE_SIZE: ${PAYLOADCMS_PAGE_SIZE:-100}
+      PAYLOADCMS_INCLUDE_DRAFT: ${PAYLOADCMS_INCLUDE_DRAFT:-false}
+    volumes:
+      - ./data:/app/data
