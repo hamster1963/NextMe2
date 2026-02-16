@@ -34,4 +34,4 @@ RUN mkdir -p /app/data
 
 EXPOSE 3052
 
-CMD ["pnpm", "start"]
+CMD ["sh", "-c", "NODE_ENV=development pnpm payload run ./scripts/bootstrap-payload-db.mjs && pnpm start"]
