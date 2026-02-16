@@ -46,14 +46,6 @@ function normalizeCategory(rawCategory: unknown) {
   return CATEGORY_MAP[normalized] || rawCategory
 }
 
-function toPositiveInt(value: string | undefined, fallbackValue: number) {
-  const parsed = Number.parseInt(value || '', 10)
-  if (Number.isNaN(parsed) || parsed <= 0) {
-    return fallbackValue
-  }
-  return parsed
-}
-
 function isMissingSQLiteTableError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
     return false
@@ -178,18 +170,7 @@ type GetBlogPostsOptions = {
 }
 
 export async function getBlogPosts(options: GetBlogPostsOptions = {}) {
-  const payloadCollection =
-    process.env.PAYLOADCMS_COLLECTION?.trim() || DEFAULT_COLLECTION
-  const payloadDepth = toPositiveInt(
-    process.env.PAYLOADCMS_DEPTH,
-    DEFAULT_DEPTH
-  )
-  const payloadPageSize = toPositiveInt(
-    process.env.PAYLOADCMS_PAGE_SIZE,
-    DEFAULT_PAGE_SIZE
-  )
-  const includeDraft =
-    options.includeDraft ?? process.env.PAYLOADCMS_INCLUDE_DRAFT === 'true'
+  const includeDraft = options.includeDraft ?? false
 
   const [{ getPayload }, { default: config }] = await Promise.all([
     import('payload'),
@@ -208,15 +189,15 @@ export async function getBlogPosts(options: GetBlogPostsOptions = {}) {
   let data: { docs?: any[] }
   try {
     data = await payload.find({
-      collection: payloadCollection as any,
-      depth: payloadDepth,
+      collection: DEFAULT_COLLECTION as any,
+      depth: DEFAULT_DEPTH,
       draft: includeDraft,
-      limit: payloadPageSize,
+      limit: DEFAULT_PAGE_SIZE,
       sort: '-publishedAt',
       ...(where ? { where } : {}),
     })
   } catch (error) {
-    // Initial install may not have executed a migration yet.
+    // First boot can race before SQLite table creation finishes.
     if (isMissingSQLiteTableError(error)) {
       return []
     }

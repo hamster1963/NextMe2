@@ -5,6 +5,11 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getBlogPosts } from '../../../db/blog'
+import {
+  getOgImageUrl,
+  getSiteSettings,
+  toAbsoluteUrl,
+} from '../../../db/site-settings'
 import ReturnButton from './return-button'
 
 interface Heading {
@@ -46,6 +51,7 @@ export default async function DailyContent({
   includeDraft = false,
 }: DailyContentProps) {
   const getPost = await getBlogPosts({ includeDraft })
+  const { siteUrl } = await getSiteSettings()
 
   if (!getPost) {
     notFound()
@@ -70,8 +76,12 @@ export default async function DailyContent({
             datePublished: post.metadata.publishedAt,
             dateModified: post.metadata.publishedAt,
             description: post.metadata.summary,
-            image: getOGImageUrl(post.metadata.image, post.metadata.title),
-            url: `https://buycoffee.top/blog/daily/${post.slug}`,
+            image: getOgImageUrl({
+              image: post.metadata.image,
+              siteUrl,
+              title: post.metadata.title,
+            }),
+            url: toAbsoluteUrl(`/blog/daily/${post.slug}`, siteUrl),
             author: {
               '@type': 'Person',
               name: 'Hamster1963',
@@ -137,16 +147,4 @@ function formatDate(date: string) {
   })
 
   return `${fullDate}`
-}
-
-function getOGImageUrl(image?: string, title?: string) {
-  if (!image) {
-    return `https://buycoffee.top/og?title=${title}`
-  }
-
-  if (image.startsWith('http://') || image.startsWith('https://')) {
-    return image
-  }
-
-  return `https://buycoffee.top${image}`
 }

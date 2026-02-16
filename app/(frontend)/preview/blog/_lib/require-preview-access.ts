@@ -1,9 +1,6 @@
 import { notFound } from 'next/navigation'
 
-const PREVIEW_SECRET =
-  process.env.PREVIEW_SECRET ||
-  process.env.PAYLOAD_SECRET ||
-  'dev-payload-secret'
+const PREVIEW_SECRET = process.env.PAYLOAD_SECRET || 'dev-payload-secret'
 
 type PreviewSearchParams = {
   previewSecret?: string | string[]

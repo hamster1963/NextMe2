@@ -1,9 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-const PREVIEW_SECRET =
-  process.env.PREVIEW_SECRET ||
-  process.env.PAYLOAD_SECRET ||
-  'dev-payload-secret'
+const PREVIEW_SECRET = process.env.PAYLOAD_SECRET || 'dev-payload-secret'
 
 const CATEGORY_PATH_MAP: Record<string, string> = {
   tech: 'tech',

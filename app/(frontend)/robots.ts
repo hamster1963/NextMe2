@@ -1,13 +1,17 @@
-export const dynamic = 'force-static'
+import { getSiteSettings, toAbsoluteUrl } from './db/site-settings'
 
-export default function robots() {
+export const dynamic = 'force-dynamic'
+
+export default async function robots() {
+  const { siteUrl } = await getSiteSettings()
+
   return {
     rules: [
       {
         userAgent: '*',
       },
     ],
-    sitemap: 'https://buycoffee.top/sitemap.xml',
-    host: 'https://buycoffee.top',
+    sitemap: toAbsoluteUrl('/sitemap.xml', siteUrl),
+    host: siteUrl,
   }
 }

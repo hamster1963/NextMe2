@@ -1,34 +1,31 @@
 import { getBlogPosts } from 'app/db/blog'
+import {
+  getOgImageUrl,
+  getSiteSettings,
+  toAbsoluteUrl,
+} from 'app/db/site-settings'
 import type { Metadata } from 'next'
 import DailyContent from './blog-content'
 
-function getOGImageUrl(image?: string, title?: string) {
-  if (!image) {
-    return `https://buycoffee.top/og?title=${title}`
-  }
-
-  if (image.startsWith('http://') || image.startsWith('https://')) {
-    return image
-  }
-
-  return `https://buycoffee.top${image}`
-}
-
 export async function generateMetadata(props): Promise<Metadata | undefined> {
   const params = await props.params
+  const { siteUrl } = await getSiteSettings()
   const getPost = await getBlogPosts()
   if (!getPost) {
     return
   }
   const post = getPost.find((post) => post.slug === params.slug)
+  if (!post) {
+    return
+  }
 
   const {
     title,
     publishedAt: publishedTime,
     summary: description,
     image,
-  } = post?.metadata || {}
-  const ogImage = getOGImageUrl(image, title)
+  } = post.metadata
+  const ogImage = getOgImageUrl({ image, siteUrl, title })
 
   return {
     title,
@@ -38,7 +35,7 @@ export async function generateMetadata(props): Promise<Metadata | undefined> {
       description,
       type: 'article',
       publishedTime,
-      url: `https://buycoffee.top/blog/daily/${post?.slug}`,
+      url: toAbsoluteUrl(`/blog/daily/${post.slug}`, siteUrl),
       images: [
         {
           url: ogImage,

@@ -7,6 +7,7 @@ import sharp from 'sharp'
 import { Media } from './payload/collections/Media.ts'
 import { Posts } from './payload/collections/Posts.ts'
 import { Users } from './payload/collections/Users.ts'
+import { SiteSettings } from './payload/globals/SiteSettings.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -41,15 +42,14 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Posts],
+  globals: [SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-payload-secret',
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URI || 'file:./payload.db',
     },
-    push:
-      process.env.PAYLOAD_DB_PUSH === 'true' ||
-      process.env.NODE_ENV !== 'production',
+    push: true,
   }),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

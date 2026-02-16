@@ -11,6 +11,7 @@ import AnimatedHeader from './components/animated-header'
 import LivePreviewListener from './components/live-preview-listener'
 import { MotionProvider } from './components/motion-provider'
 import Nav from './components/nav'
+import { getSiteSettings } from './db/site-settings'
 import Footer from './footer'
 
 export const viewport: Viewport = {
@@ -20,42 +21,46 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL('https://buycoffee.top'),
-  title: {
-    default: 'Hamster1963',
-    template: '%s | Hamster1963',
-  },
-  description: 'Developer, writer, and creator.',
-  openGraph: {
-    title: 'Hamster1963',
-    description: 'Developer, writer, and creator.',
-    url: 'https://buycoffee.top',
-    siteName: 'Hamster1963',
-    locale: 'zh_CN',
-    type: 'website',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+export async function generateMetadata(): Promise<Metadata> {
+  const { description, locale, siteName, siteUrl } = await getSiteSettings()
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: siteName,
+      template: `%s | ${siteName}`,
+    },
+    description,
+    openGraph: {
+      title: siteName,
+      description,
+      url: siteUrl,
+      siteName,
+      locale,
+      type: 'website',
+    },
+    robots: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
-  },
-  twitter: {
-    title: 'Hamster1963',
-    card: 'summary_large_image',
-  },
-  alternates: {
-    canonical: 'https://buycoffee.top',
-    types: {
-      'application/rss+xml': [{ url: 'rss', title: 'RSS 订阅' }],
+    twitter: {
+      title: siteName,
+      card: 'summary_large_image',
     },
-  },
+    alternates: {
+      canonical: siteUrl,
+      types: {
+        'application/rss+xml': [{ url: 'rss', title: 'RSS 订阅' }],
+      },
+    },
+  }
 }
 
 const cx = (...classes: string[]) => classes.filter(Boolean).join(' ')

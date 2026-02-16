@@ -5,6 +5,11 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { customComponents, slugify } from '../../../components/mdx'
 import { getBlogPosts } from '../../../db/blog'
+import {
+  getOgImageUrl,
+  getSiteSettings,
+  toAbsoluteUrl,
+} from '../../../db/site-settings'
 import ReturnButton from './return-button'
 import TOC from './toc'
 
@@ -47,6 +52,7 @@ export default async function BlogContent({
   includeDraft = false,
 }: BlogContentProps) {
   const getPost = await getBlogPosts({ includeDraft })
+  const { siteUrl } = await getSiteSettings()
 
   if (!getPost) {
     notFound()
@@ -85,8 +91,12 @@ export default async function BlogContent({
             datePublished: post.metadata.publishedAt,
             dateModified: post.metadata.publishedAt,
             description: post.metadata.summary,
-            image: getOGImageUrl(post.metadata.image, post.metadata.title),
-            url: `https://buycoffee.top/blog/tech/${post.slug}`,
+            image: getOgImageUrl({
+              image: post.metadata.image,
+              siteUrl,
+              title: post.metadata.title,
+            }),
+            url: toAbsoluteUrl(`/blog/tech/${post.slug}`, siteUrl),
             author: {
               '@type': 'Person',
               name: 'Hamster1963',
@@ -186,16 +196,4 @@ function formatDate(date: string) {
   })
 
   return `${fullDate}`
-}
-
-function getOGImageUrl(image?: string, title?: string) {
-  if (!image) {
-    return `https://buycoffee.top/og?title=${title}`
-  }
-
-  if (image.startsWith('http://') || image.startsWith('https://')) {
-    return image
-  }
-
-  return `https://buycoffee.top${image}`
 }
