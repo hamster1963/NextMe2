@@ -15,7 +15,7 @@ export default function Footer() {
     <footer className={cn('pt-20 sm:px-14', pathname === '/' && 'hidden')}>
       <section className="flex flex-col">
         <p className="mt-1 flex gap-1 font-light text-[13px] text-neutral-600/50 tracking-tight dark:text-neutral-300/50">
-          使用{' '}
+          Built with{' '}
           <a
             href="https://nextjs.org"
             className="cursor-pointer font-normal underline decoration-2 decoration-yellow-500 underline-offset-2 dark:decoration-yellow-500/50"
@@ -29,7 +29,6 @@ export default function Footer() {
           >
             NextMe
           </a>{' '}
-          构建
         </p>
         <section className="mt-1 flex items-center gap-2 font-light text-[13px] text-neutral-600/50 tracking-tight dark:text-neutral-300/50">
           © 2021-{currentYear}{' '}

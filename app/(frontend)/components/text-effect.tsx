@@ -34,10 +34,10 @@ AnimationComponent.displayName = 'AnimationComponent'
 
 function splitText(text: string): string[] {
   if ('Segmenter' in Intl) {
-    const segmenter = new Intl.Segmenter('zh-CN', { granularity: 'word' })
+    const segmenter = new Intl.Segmenter('en-US', { granularity: 'word' })
     return Array.from(segmenter.segment(text), (segment) => segment.segment)
   }
-  // 降级方案：简单的空格分割
+  // Fallback: split by spaces
   return text.split(/\s+/)
 }
 
@@ -48,7 +48,7 @@ export function TextEffect({ children, className }: TextEffectProps) {
   const [containerHeight, setContainerHeight] = useState(20)
 
   useEffect(() => {
-    const delays = words.map(() => Math.random() * 50 + 30) // 生成30ms到80ms之间的随机延迟
+    const delays = words.map(() => Math.random() * 50 + 30) // 30ms to 80ms randomized delays
     const timeouts: NodeJS.Timeout[] = []
 
     words.forEach((word, index) => {

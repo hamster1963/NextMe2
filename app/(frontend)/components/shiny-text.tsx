@@ -14,12 +14,12 @@ interface ShinyTextProps {
   style?: React.CSSProperties
 }
 
-// 判断当前是亮色还是暗色主题的 Hook
+// Hook to detect current light/dark theme
 const useTheme = () => {
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
-    // 初始化时检测主题
+    // Detect theme on initial mount
     const checkTheme = () => {
       const darkModeMediaQuery = window.matchMedia(
         '(prefers-color-scheme: dark)'
@@ -29,7 +29,7 @@ const useTheme = () => {
 
     checkTheme()
 
-    // 监听主题变化
+    // Subscribe to theme changes
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = (e: MediaQueryListEvent) => {
       setIsDark(e.matches)

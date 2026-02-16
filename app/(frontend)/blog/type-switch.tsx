@@ -7,15 +7,15 @@ import { useMemo } from 'react'
 
 const blogTypeList = [
   {
-    name: '博客',
+    name: 'Blog',
     url: '/blog',
   },
   {
-    name: '独白',
+    name: 'Inside',
     url: '/blog/inside',
   },
   {
-    name: '杂记',
+    name: 'Daily',
     url: '/blog/daily',
   },
 ]

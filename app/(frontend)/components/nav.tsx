@@ -15,12 +15,12 @@ import {
 
 export const siteUrlList = [
   {
-    name: '主页',
+    name: 'Home',
     url: '/',
     icon: HomeIcon,
   },
   {
-    name: '博客',
+    name: 'Blog',
     url: '/blog',
     icon: FireIcon,
   },
@@ -33,17 +33,17 @@ export default function Nav() {
       _nowPath === url || (_nowPath.includes('/blog') && url.includes('/blog'))
   }, [_nowPath])
 
-  // 去除滚动显示/隐藏逻辑，始终显示导航与渐变层
+  // Keep nav and gradient layer always visible
   return (
     <div className="fixed inset-x-0 top-0 z-50 flex flex-col items-center">
-      {/* 渐变层：始终可见，用于提升顶部文字与背景对比 */}
+      {/* Always-on gradient layer for top readability */}
       <div
         aria-hidden
         className={cn(
           'pointer-events-none absolute inset-x-0 top-0 top-gradient-overlay h-24'
         )}
       />
-      {/* 占位（避免内容被覆盖，可按需调整高度） */}
+      {/* Spacer to avoid content overlap */}
       <div className="pt-1" />
       <nav className="relative mt-2 flex items-center gap-2 px-2 py-1">
         {siteUrlList.map((site) => (

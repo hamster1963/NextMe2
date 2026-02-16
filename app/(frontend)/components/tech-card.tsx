@@ -13,7 +13,7 @@ export default function TechCard({ techList }: TechCardProps) {
   return (
     <>
       <h2 className="mb-4 font-medium text-[18px] tracking-tighter">
-        项目信息
+        Project Info
       </h2>
       <div
         className={

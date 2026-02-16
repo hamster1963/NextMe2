@@ -14,13 +14,13 @@ const scrollToHeading = (text: string) => {
   }
 }
 
-// TOC 组件
+// TOC component
 export default function TOC({ headings }) {
   const [activeId, setActiveId] = useState('')
   const [isVisible, setIsVisible] = useState(false)
   const [progress, setProgress] = useState(0)
 
-  // 处理点击外部关闭
+  // Close TOC when clicking outside
   const handleClickOutside = useCallback(
     (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -51,7 +51,7 @@ export default function TOC({ headings }) {
     }
 
     window.addEventListener('scroll', calculateProgress)
-    calculateProgress() // 初始计算
+    calculateProgress() // Initial calculation
 
     return () => window.removeEventListener('scroll', calculateProgress)
   }, [])
@@ -78,7 +78,7 @@ export default function TOC({ headings }) {
 
   return (
     <>
-      {/* 桌面端按钮 */}
+      {/* Desktop button */}
       <div className="fixed top-[15%] left-2 z-40 hidden items-center lg:flex">
         <button
           type="button"
@@ -92,7 +92,7 @@ export default function TOC({ headings }) {
         </span>
       </div>
 
-      {/* 移动端浮动按钮 */}
+      {/* Mobile floating button */}
       <div className="fixed right-5 bottom-6 z-40 flex items-center gap-1 lg:hidden">
         <button
           type="button"
@@ -106,14 +106,14 @@ export default function TOC({ headings }) {
         </button>
       </div>
 
-      {/* 目录内容 */}
+      {/* TOC content */}
       <m.div
         className={`toc-content fixed z-30 overflow-y-auto ${
           isVisible
             ? 'pointer-events-auto opacity-100'
             : 'pointer-events-none opacity-0'
         } ${
-          // 移动端全屏显示，桌面端保持原样
+          // Full screen on mobile; keep default on desktop
           'lg:top-[18%] lg:left-0 lg:max-h-[75vh] lg:w-fit lg:bg-transparent lg:p-4 lg:backdrop-blur-none lg:dark:bg-transparent ' +
           'top-0 left-0 h-full w-full bg-white/95 p-8 backdrop-blur-sm dark:bg-black/95'
         }`}
@@ -138,7 +138,7 @@ export default function TOC({ headings }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              回到顶部
+              Back to top
             </m.a>
           </div>
           {headings.map((heading) => (
@@ -151,7 +151,7 @@ export default function TOC({ headings }) {
                   e.stopPropagation()
                   scrollToHeading(heading.id)
                   if (window.innerWidth < 1024) {
-                    // 移动端点击后关闭目录
+                    // Close TOC after click on mobile
                     setIsVisible(false)
                   }
                 }}
@@ -171,7 +171,7 @@ export default function TOC({ headings }) {
   )
 }
 
-// 添加这个辅助函数来获取缩进类
+// Helper to compute indentation classes by heading level
 function getIndentClass(level: number): string {
   switch (level) {
     case 2:

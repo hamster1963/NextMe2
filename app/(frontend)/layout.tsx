@@ -1,13 +1,9 @@
 import './global.css'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
-import { StatusProvider } from 'lib/status-context'
-import { UpdateStatusProvider } from 'lib/update-status-context'
 import type { Metadata } from 'next'
 import type { Viewport } from 'next'
 import type React from 'react'
-import AnimatedFooter from './components/animated-footer'
-import AnimatedHeader from './components/animated-header'
 import LivePreviewListener from './components/live-preview-listener'
 import { MotionProvider } from './components/motion-provider'
 import Nav from './components/nav'
@@ -57,7 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: siteUrl,
       types: {
-        'application/rss+xml': [{ url: 'rss', title: 'RSS 订阅' }],
+        'application/rss+xml': [{ url: 'rss', title: 'RSS Feed' }],
       },
     },
   }
@@ -81,18 +77,12 @@ export default async function RootLayout({
     >
       <body className="relative mx-4 flex max-w-2xl flex-col pt-12 pb-12 antialiased sm:mx-auto md:flex-row">
         <MotionProvider>
-          <StatusProvider>
-            <UpdateStatusProvider>
-              <main className="flex min-w-0 flex-auto flex-col px-2 pt-8 md:px-0">
-                <LivePreviewListener />
-                {children}
-                <Nav />
-                <Footer />
-                <AnimatedHeader />
-                <AnimatedFooter />
-              </main>
-            </UpdateStatusProvider>
-          </StatusProvider>
+          <main className="flex min-w-0 flex-auto flex-col px-2 pt-8 md:px-0">
+            <LivePreviewListener />
+            {children}
+            <Nav />
+            <Footer />
+          </main>
         </MotionProvider>
       </body>
     </html>

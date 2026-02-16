@@ -7,7 +7,7 @@ export type SiteSettings = {
 
 const DEFAULT_SITE_NAME = 'Hamster1963'
 const DEFAULT_SITE_DESCRIPTION = 'Developer, writer, and creator.'
-const DEFAULT_SITE_LOCALE = 'zh_CN'
+const DEFAULT_SITE_LOCALE = 'en_US'
 const DEFAULT_SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.SITE_URL ||

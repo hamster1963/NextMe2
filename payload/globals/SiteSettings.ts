@@ -45,7 +45,7 @@ export const SiteSettings: GlobalConfig = {
       defaultValue: DEFAULT_SITE_URL,
       admin: {
         description:
-          '用于 SEO 的站点地址，例如 https://example.com（不需要结尾斜杠）。',
+          'Site URL for SEO, for example https://example.com (without trailing slash).',
       },
       hooks: {
         beforeValidate: [
@@ -64,18 +64,18 @@ export const SiteSettings: GlobalConfig = {
       },
       validate: (value) => {
         if (typeof value !== 'string' || value.trim().length === 0) {
-          return '请填写站点地址'
+          return 'Please provide the site URL'
         }
 
         try {
           const normalized = normalizeSiteUrl(value)
           const parsed = new URL(normalized)
           if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-            return '站点地址必须以 http 或 https 开头'
+            return 'Site URL must start with http or https'
           }
           return true
         } catch {
-          return '请输入合法的站点地址，例如 https://example.com'
+          return 'Please enter a valid site URL, for example https://example.com'
         }
       },
     },
@@ -87,7 +87,7 @@ export const SiteSettings: GlobalConfig = {
     {
       name: 'locale',
       type: 'text',
-      defaultValue: 'zh_CN',
+      defaultValue: 'en_US',
     },
   ],
 }

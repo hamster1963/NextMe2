@@ -45,7 +45,7 @@ export default function NowPlayingStatus({
     isExpired = diff >= 60 * 1000
 
     if (isExpired) {
-      const formattedDate = lastPlayedDate.toLocaleDateString('zh-CN', {
+      const formattedDate = lastPlayedDate.toLocaleDateString('en-US', {
         weekday: 'short',
         hour: 'numeric',
         minute: 'numeric',
@@ -64,7 +64,7 @@ export default function NowPlayingStatus({
             <span className="relative inline-flex h-2 w-2 rounded-full bg-neutral-200 dark:bg-neutral-700" />
           </span>
           <div className="text-xs opacity-40">
-            上次听歌时间:{lastPlayedString}
+            Last played:{lastPlayedString}
           </div>
         </div>
         <RenderedTimeAgo timestamp={timestamp * 1000} />
@@ -83,7 +83,7 @@ export default function NowPlayingStatus({
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-green-600" />
               </span>
               <AnimatedShinyText className={'text-xs'}>
-                正在收听中
+                Listening now
               </AnimatedShinyText>
             </>
           )}
@@ -93,7 +93,7 @@ export default function NowPlayingStatus({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400" />
               </span>
-              <div className="text-xs opacity-30">已暂停</div>
+              <div className="text-xs opacity-30">Paused</div>
             </>
           )}
         </div>

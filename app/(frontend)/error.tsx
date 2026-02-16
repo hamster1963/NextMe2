@@ -12,7 +12,9 @@ export default function ErrorPage({
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <p className="font-semibold text-sm">出错了，可能刷新一下就好了....</p>
+      <p className="font-semibold text-sm">
+        Something went wrong. Try refreshing the page.
+      </p>
     </div>
   )
 }

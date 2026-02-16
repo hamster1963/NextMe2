@@ -1,6 +1,6 @@
 # NextMe Blog
 
-简体中文文档: [README.zh-CN.md](./README.zh-CN.md)
+Chinese docs: [README.zh-CN.md](./README.zh-CN.md)
 
 ## One-command deployment with Docker Compose
 

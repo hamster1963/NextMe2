@@ -12,8 +12,8 @@ export default function UpdaterDemoClient() {
 
   const handleRestart = () => {
     if (updaterRef.current) {
-      // @ts-expect-error 调用 UpdaterDemo 的重启动画方法
-      updaterRef.current.restartAnimation() // 调用 UpdaterDemo 的重启动画方法
+      // @ts-expect-error Call UpdaterDemo restart method
+      updaterRef.current.restartAnimation() // Trigger restart animation
     }
   }
 
@@ -34,7 +34,7 @@ export default function UpdaterDemoClient() {
 
 const UpdaterDemo = forwardRef((_props, ref) => {
   const [loading, setLoading] = useState(false)
-  const [key, setKey] = useState(0) // 控制动画重启的 key
+  const [key, setKey] = useState(0) // Key used to restart animation
 
   const handleUpdate = () => {
     setLoading(true)
@@ -47,10 +47,10 @@ const UpdaterDemo = forwardRef((_props, ref) => {
   }
 
   const restartAnimation = () => {
-    setKey((prevKey) => prevKey + 1) // 更新 key 以重启动画
+    setKey((prevKey) => prevKey + 1) // Update key to restart animation
   }
 
-  // 将 restartAnimation 暴露给外部组件
+  // Expose restartAnimation to parent component
   useImperativeHandle(ref, () => ({
     restartAnimation,
   }))
@@ -59,7 +59,7 @@ const UpdaterDemo = forwardRef((_props, ref) => {
     <div className="flex flex-col items-center justify-center gap-2">
       <AnimatePresence mode="wait">
         <m.div
-          key={key} // 使用 key 来控制重启动画
+          key={key} // Use key to control re-animation
           initial={{ opacity: 0, filter: 'blur(10px)', scale: 0.8 }}
           animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
           exit={{ opacity: 0, filter: 'blur(10px)', scale: 0.8 }}
@@ -68,7 +68,9 @@ const UpdaterDemo = forwardRef((_props, ref) => {
         >
           <section className="flex items-center gap-1.5">
             <Info className="h-4 w-4 shrink-0 text-white" />
-            <p className="font-medium text-[12.5px] text-white">博客有新版本</p>
+            <p className="font-medium text-[12.5px] text-white">
+              New blog version available
+            </p>
           </section>
           <section className="flex items-center gap-1.5">
             <button
@@ -77,7 +79,7 @@ const UpdaterDemo = forwardRef((_props, ref) => {
               className="cursor-pointer rounded-full bg-green-700 px-2 py-1 font-medium text-white text-xs shadow-none hover:bg-green-700 dark:bg-green-700"
               onClick={handleUpdate}
             >
-              {loading ? <LoadingSpinner /> : '更新'}
+              {loading ? <LoadingSpinner /> : 'Update'}
             </button>
           </section>
         </m.div>

@@ -287,17 +287,17 @@ table {
 }
 
 .scrollbar-hidden::-webkit-scrollbar {
-  display: none; /* Chrome, Safari 和 Opera */
+  display: none; /* Chrome, Safari, and Opera */
 }
 
 .relative-link::before {
   content: "";
   position: absolute;
-  top: -5px; /* 控制扩展的上边距 */
-  bottom: -5px; /* 控制扩展的下边距 */
+  top: -5px; /* Extend clickable area upward */
+  bottom: -5px; /* Extend clickable area downward */
   left: 0;
   right: 0;
-  z-index: 10; /* 确保点击区域在其他元素之上 */
+  z-index: 10; /* Keep click area above surrounding elements */
 }
 
 [data-issues-count-animation] {
@@ -350,7 +350,7 @@ table {
   }
 }
 
-/* 顶部导航阅读性渐变：保持更长的不透明区域，稍晚再淡出 */
+/* Top navigation readability gradient: keep opaque area longer, then fade */
 .top-gradient-overlay {
   /* smoother + earlier fade: begin ~38%, multiple soft stops */
   background: linear-gradient(

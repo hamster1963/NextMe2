@@ -46,7 +46,7 @@ export default function CopySuccess({
           >
             <div className="flex h-full min-h-[24px] w-full items-center justify-center gap-1 text-white [text-shadow:_0_1px_0_rgb(0_0_0_/_20%)]">
               <p className="font-semibold text-[13px]">
-                RSS 链接已复制到剪贴板
+                RSS link copied to clipboard
               </p>
             </div>
           </m.div>

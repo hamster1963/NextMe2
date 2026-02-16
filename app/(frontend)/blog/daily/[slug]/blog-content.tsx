@@ -21,20 +21,20 @@ interface Heading {
 function extractHeadings(source: string) {
   const headings: Heading[] = []
 
-  // 移除代码块
+  // Remove fenced code blocks
   const cleanedSource = source.replace(/```[\s\S]*?```/g, '')
 
-  // 匹配 Markdown 标题，如 ## 标题
+  // Match markdown headings like "## Title"
   const headingRegex = /^(#{1,6})\s+(.*)$/gm
   let match = headingRegex.exec(cleanedSource)
   while (match !== null) {
-    const level = match[1].length // # 的数量表示标题等级
+    const level = match[1].length // Number of "#" determines heading level
     let text = match[2].trim()
 
-    // 去除加粗标记
+    // Strip bold markers
     text = text.replace(/\*\*(.*?)\*\*/g, '$1')
 
-    const id = slugify(text) // 使用 slugify 函数生成 ID
+    const id = slugify(text) // Generate heading id via slugify
     headings.push({ level, id, text })
     match = headingRegex.exec(cleanedSource)
   }
@@ -91,7 +91,7 @@ export default async function DailyContent({
       />
       <ReturnButton
         className="text-[13px] transition-opacity hover:opacity-50"
-        title="回到列表"
+        title="Back to list"
       />
       <h1 className="mt-0.5 mb-2 font-medium text-2xl tracking-tighter">
         {post.metadata.title}
@@ -99,14 +99,16 @@ export default async function DailyContent({
       <div className="mt-6 mb-6 flex max-w-[650px] items-start gap-8">
         <div className="flex flex-col gap-1">
           <p className="text-neutral-600 text-xs dark:text-neutral-400">
-            发布日期
+            Published
           </p>
           <p className="flex h-5 items-center font-medium text-[13px] text-neutral-800 dark:text-neutral-200">
             {formatDate(post.metadata.publishedAt)}
           </p>
         </div>
         <div className="flex flex-col gap-1">
-          <p className="text-neutral-600 text-xs dark:text-neutral-400">作者</p>
+          <p className="text-neutral-600 text-xs dark:text-neutral-400">
+            Author
+          </p>
           <div className="flex items-center gap-1">
             <div className="relative size-[18px] overflow-hidden rounded-full border-[0.5px] border-neutral-200 transition-opacity dark:border-none dark:brightness-90">
               <Image
@@ -121,7 +123,7 @@ export default async function DailyContent({
               />
             </div>
             <p className="flex h-5 items-center font-medium text-[12px] text-neutral-800 dark:text-neutral-200">
-              仓鼠
+              Hamster
             </p>
           </div>
         </div>
@@ -140,7 +142,7 @@ function formatDate(date: string) {
     dateString = `${dateString}T00:00:00`
   }
 
-  const fullDate = new Date(dateString).toLocaleString('zh-CN', {
+  const fullDate = new Date(dateString).toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

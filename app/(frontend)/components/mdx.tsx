@@ -76,10 +76,10 @@ async function CenterImage(props: { src: string; alt: string }) {
     )
   }
 
-  // 使用文件路径生成 MD5 哈希值
+  // Build an MD5 hash from the image path
   const contentHash = crypto.createHash('md5').update(imagePath).digest('hex')
 
-  // 修改缓存目录路径
+  // Cache directory path
   const cacheDir = path.join(
     process.cwd(),
     '.next',
@@ -91,24 +91,27 @@ async function CenterImage(props: { src: string; alt: string }) {
 
   let preImage: any
 
-  // 检查缓存中是否已存在占位图信息
+  // Try loading placeholder info from cache
   try {
     const cachedPlaceholder = await fs.readFile(placeholderCachePath, 'utf-8')
     preImage = JSON.parse(cachedPlaceholder)
   } catch (error) {
     console.log(error)
-    // 如果缓存不存在,生成新的占位图信息
-    console.log('占位图缓存不存在,生成新的', placeholderCachePath)
+    // Generate placeholder info when cache is missing
+    console.log(
+      'Placeholder cache missing, generating new file:',
+      placeholderCachePath
+    )
     preImage = await getPlaceholderBlogImage(imagePath)
 
-    // 保存占位图信息到缓存
+    // Persist generated placeholder info
     await fs.mkdir(cacheDir, { recursive: true })
     await fs.writeFile(placeholderCachePath, JSON.stringify(preImage))
   }
 
-  // 检查文件扩展名是否为 .gif
+  // Skip optimization for GIF files
   if (imagePath.toLowerCase().endsWith('.gif')) {
-    // 如果是 GIF,直接返回原始图片
+    // Return original image for GIF
     return (
       <>
         <BlogImage
@@ -130,37 +133,37 @@ async function CenterImage(props: { src: string; alt: string }) {
   const cacheFileName = `${contentHash}-optimized.webp`
   const cachePath = path.join(cacheDir, cacheFileName)
 
-  // 设置 public 目录中的目标路径
+  // Build target path under the public directory
   const publicDir = path.join(process.cwd(), 'public', 'optimized')
   const publicFileName = `${contentHash}-optimized.webp`
   const publicPath = path.join(publicDir, publicFileName)
 
-  // 检查缓存中是否已存在优化后的图片
+  // Try reading optimized image from cache
   try {
     await fs.access(cachePath)
-    // 如果缓存存在，将其复制到 public 目录
+    // If exists, copy cached file to public directory
     await fs.mkdir(publicDir, { recursive: true })
     await fs.copyFile(cachePath, publicPath)
   } catch (error) {
-    // 如果缓存不存在，进行优化处理
+    // If missing, optimize and write cache/public files
     console.log(error)
-    console.log('缓存不存在', cachePath)
+    console.log('Optimized cache missing:', cachePath)
     const originalBuffer = await getFileBuffer(imagePath)
     const optimizedBuffer = await sharp(originalBuffer)
       .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 90, lossless: true })
       .toBuffer()
 
-    // 确保目录存在
+    // Ensure destination directories exist
     await fs.mkdir(cacheDir, { recursive: true })
     await fs.mkdir(publicDir, { recursive: true })
 
-    // 保存优化后的图片到缓存目录和 public 目录
+    // Write optimized image to cache and public paths
     await fs.writeFile(cachePath, optimizedBuffer)
     await fs.writeFile(publicPath, optimizedBuffer)
   }
 
-  // 返回使用 public 目录中的优化图片
+  // Return optimized image from public directory
   return (
     <>
       <BlogImage
