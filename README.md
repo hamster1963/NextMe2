@@ -6,8 +6,6 @@
 
 1. Edit `docker-compose.yml`:
 
-- `image` (your published image tag)
-- `ports` (host port mapping)
 - `PAYLOAD_SECRET` (set a secure value)
 
 2. Start:

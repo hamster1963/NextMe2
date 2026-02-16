@@ -6,8 +6,6 @@ English README: [README.md](./README.md)
 
 1. 编辑 `docker-compose.yml`：
 
-- `image`（你的发布镜像 tag）
-- `ports`（宿主机端口映射）
 - `PAYLOAD_SECRET`（设置为安全值）
 
 2. 启动服务：
