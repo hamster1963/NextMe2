@@ -1,0 +1,60 @@
+.musicBubble {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 20px;
+  /* border: 0.5px solid var(--color-neutral-200); */
+  background-color: var(--color-neutral-100);
+  padding: 8px 12px;
+  color: black;
+  max-width: 250px;
+  overflow: visible;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.musicBubble::before,
+.musicBubble::after {
+  position: absolute;
+  bottom: 0;
+  height: 16px;
+  content: "";
+}
+
+.musicBubble::before {
+  left: -7px;
+  width: 20px;
+  background-color: var(--color-neutral-100);
+  border-bottom-right-radius: 15px 14px;
+}
+
+.musicBubble::after {
+  left: -26px;
+  width: 26px;
+  background-color: white;
+  border-bottom-right-radius: 10px;
+}
+
+@media (min-width: 420px) {
+  .musicBubble {
+    max-width: 400px;
+  }
+}
+
+/* Dark mode */
+/* Dark mode: follow OS/browser preference */
+@media (prefers-color-scheme: dark) {
+  .musicBubble {
+    background-color: var(--color-neutral-800);
+    color: white;
+  }
+
+  .musicBubble::before {
+    background-color: var(--color-neutral-800);
+  }
+
+  .musicBubble::after {
+    background-color: #111010;
+  }
+}

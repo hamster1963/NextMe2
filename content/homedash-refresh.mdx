@@ -1,0 +1,76 @@
+---
+title: 'HomeDash Refresh'
+publishedAt: '2026-02-16'
+summary: 'Homedash Refresh'
+image: '/blog-img/homedash-refresh/cover.webp'
+rssImage: '/blog-img/homedash-refresh/cover.jpeg'
+category: 'Tech'
+---
+
+嗨！大家新年好呀！
+
+又是一年过去了，去年翻新了博客的整体设计，那今年就来对 HomeDash 动动刀子吧。
+
+其实 HomeDash 从采用 shadcn 作为底层组件进行重构后，整体的设计几乎与第一天没有太大的区别，设计上几乎就是采用原生的组件样式，无非就是改改边距与字体大小。
+
+![alt:旧版 HomeDash 的布局](/blog-img/homedash-refresh/CleanShot_2026-02-16_at_15.48.322x.png)
+
+从 2024 年到现在，也只加上了 Bus（实时公交）与 AI（AI 使用情况）两个页面，因此在界面设计与功能上一直还是蛮克制的，除了必要的数据展示，其他的内容都不会展示。
+
+## 第一次尝试
+
+偶然在 X 上看到了 Vercel 公司的开发的 Geist 字体新增了 Pixel 类，据说特别适合用在科技公司的主页或者极客风的 UI 中，这不免也让我想到，这种新字体是否也可以很好地适配 HomeDash 呢？
+
+![CleanShot 2026-02-16 at 01.23.00@2x.png](/blog-img/homedash-refresh/CleanShot_2026-02-16_at_01.23.002x.png)
+
+[Geist Font](https://vercel.com/font?type=pixel)
+
+想到这个想法后，我便让 Codex 让我去实现这个构思，花了 5 分钟左右，便将字体替换为了 Geist Pixel。
+
+![CleanShot 2026-02-16 at 15.50.06@2x.png](/blog-img/homedash-refresh/CleanShot_2026-02-16_at_15.50.062x.png)
+
+## 当前的问题
+
+看起来…还不错，但是也仅限于此了。
+
+新的字体在呈现数字类的指标时感觉还不错，但是 Geist Pixel 并不支持中文，中英混排时会带来糟糕的观感。
+
+同时大量的 Pixel 风格的数字密集出现在一个页面时，只会让人感到烦躁，更不想去看数字了。
+
+同时，在旧版的布局下，底部的 nav 使用的渐变模糊渲染耗费了许多性能，顶部的留白与网络图表中的空间占用也存在不小的问题
+
+## 新的布局
+
+于是我把目光投向了 Tailwind CSS 团队推出的 Catalyst UI Kit。
+
+[Getting started - Catalyst UI Kit for Tailwind CSS](https://catalyst.tailwindui.com/docs)
+
+在 2024 这个 UI Kit 推出的时候就吸引了我的注意，界面简洁，配色与字体的选择恰到好处，简直是教科书般的设计，同时在无障碍方面也做的十分完善。
+
+在其中，布局组件的设计最令我印象深刻，独立的导航栏，带有圆角与边距的内容区域，一切都看起来简约而实用。
+
+![CleanShot 2026-02-16 at 15.45.54@2x.png](/blog-img/homedash-refresh/CleanShot_2026-02-16_at_15.45.542x.png)
+
+于是我便将计划将这个布局带入到 HomeDash 中。
+
+## 最终设计
+
+![CleanShot 2026-02-16 at 15.47.25@2x.png](/blog-img/homedash-refresh/CleanShot_2026-02-16_at_15.47.252x.png)
+
+在最终的设计中：
+
+- 布局组件采用了 Catalyst 的 layout 组件
+- 实时用户和天气信息移到了导航栏上
+- 优化了网络信息中图表的占比和位置
+
+在新布局下，HomeDash 看起来可读性更好了，并且在相同大小的标签页下可以查看到更多的信息。
+
+## 基础升级
+
+趁着这个变化，将 Next.js 的版本从 14 升级到了 16，开启了 Turbopack 和缓存组件，顺便把 Cloudflare Worker 的部署也支持了一下。
+
+在 AI 的加持下，以前许多繁琐又耗时的基础工作真的不再是创意的枷锁，反而能让我花更多的时间在布局与功能的设计上。
+
+AI 是否真的可以完全替代我的程序员工作呢，站在 2026，每天与 AI 打交道，开发 AI 上层业务的我，还没有想出个所以然，只能跟着 AI 这个大浪潮慢慢往前走。
+
+但我明显感觉到，回望过去一年，我对于博客与阅读的态度发生了微妙的变化，似乎傻傻坐着写博客与阅读变成了 “低效” 的活动，而用 AI 去构建才是正确的选择，但是在 2026，我想让生活慢一些，从构建与输出重新回到吸收与学习中来。
