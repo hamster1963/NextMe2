@@ -1,4 +1,5 @@
 import typography from '@tailwindcss/typography'
+import tailwindcssAnimate from 'tailwindcss-animate'
 
 export default {
   content: ['./app/**/*.{ts,tsx}', './content/**/*.mdx', './public/**/*.svg'],
@@ -50,5 +51,5 @@ export default {
   future: {
     hoverOnlyWhenSupported: true,
   },
-  plugins: [typography, require('tailwindcss-animate')],
+  plugins: [typography, tailwindcssAnimate],
 }

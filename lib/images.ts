@@ -12,9 +12,27 @@ export async function getFileBufferLocal(filepath: string) {
   return fs.readFile(realFilepath)
 }
 
+function isRemotePath(filepath: string) {
+  return filepath.startsWith('http://') || filepath.startsWith('https://')
+}
+
+export async function getFileBuffer(filepath: string) {
+  if (isRemotePath(filepath)) {
+    const response = await fetch(filepath)
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch image: ${filepath} (${response.status} ${response.statusText})`
+      )
+    }
+    return Buffer.from(await response.arrayBuffer())
+  }
+
+  return getFileBufferLocal(filepath)
+}
+
 export async function getPlaceholderImage(slug: string, filepath: string) {
   try {
-    const originalBuffer = await getFileBufferLocal(filepath)
+    const originalBuffer = await getFileBuffer(filepath)
     const resizedBuffer = await sharp(originalBuffer).resize(5).toBuffer()
     return {
       slug: slug,
@@ -33,9 +51,7 @@ export async function getPlaceholderImage(slug: string, filepath: string) {
 
 export async function getPlaceholderImageFromUrl(url: string) {
   try {
-    const buffer = await fetch(url).then(async (res) =>
-      Buffer.from(await res.arrayBuffer())
-    )
+    const buffer = await getFileBuffer(url)
     const { base64 } = await getPlaiceholder(buffer)
     return {
       src: url,
@@ -52,7 +68,7 @@ export async function getPlaceholderImageFromUrl(url: string) {
 
 export async function getPlaceholderBlogImage(filepath: string) {
   try {
-    const originalBuffer = await getFileBufferLocal(filepath)
+    const originalBuffer = await getFileBuffer(filepath)
     const { color, metadata } = await getPlaiceholder(originalBuffer)
     return {
       src: filepath,
@@ -62,6 +78,10 @@ export async function getPlaceholderBlogImage(filepath: string) {
   } catch {
     return {
       src: filepath,
+      metadata: {
+        width: 1920,
+        height: 1080,
+      },
       placeholder: {
         r: 255,
         g: 255,
@@ -77,7 +97,7 @@ export async function getPlaceholderColorFromLocal(
   filepath: string
 ) {
   try {
-    const originalBuffer = await getFileBufferLocal(filepath)
+    const originalBuffer = await getFileBuffer(filepath)
     const { metadata, color } = await getPlaiceholder(originalBuffer)
     return {
       slug: slug,
@@ -89,6 +109,10 @@ export async function getPlaceholderColorFromLocal(
     return {
       slug: slug,
       src: filepath,
+      metadata: {
+        width: 1920,
+        height: 1080,
+      },
       placeholder: {
         r: 255,
         g: 255,
@@ -101,7 +125,7 @@ export async function getPlaceholderColorFromLocal(
 
 export async function getPlaceholderColorFromBlog(filepath: string) {
   try {
-    const originalBuffer = await getFileBufferLocal(filepath)
+    const originalBuffer = await getFileBuffer(filepath)
     const { color } = await getPlaiceholder(originalBuffer)
     return {
       src: filepath,

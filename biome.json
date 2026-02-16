@@ -3,7 +3,14 @@
   "vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["public", ".next", "content", "out"]
+    "ignore": [
+      "public",
+      ".next",
+      "content",
+      "out",
+      "payload-types.ts",
+      "app/(payload)/admin/importMap.js"
+    ]
   },
   "formatter": {
     "enabled": true,

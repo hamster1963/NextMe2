@@ -1,11 +1,8 @@
 import createMDX from '@next/mdx'
+import { withPayload } from '@payloadcms/next/withPayload'
 
 const nextConfig = {
-  output: 'export',
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
-  images: {
-    unoptimized: true,
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -18,8 +15,19 @@ const nextConfig = {
     },
   },
   staticPageGenerationTimeout: 120,
+  webpack: (webpackConfig) => {
+    webpackConfig.resolve.extensionAlias = {
+      '.cjs': ['.cts', '.cjs'],
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.mjs': ['.mts', '.mjs'],
+    }
+
+    return webpackConfig
+  },
 }
 
 const withMDX = createMDX({})
 
-export default withMDX(nextConfig)
+export default withPayload(withMDX(nextConfig), {
+  devBundleServerPackages: false,
+})
