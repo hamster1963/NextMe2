@@ -7,6 +7,8 @@ import {
 import type { Metadata } from 'next'
 import DailyContent from './blog-content'
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(props): Promise<Metadata | undefined> {
   const params = await props.params
   const { siteUrl } = await getSiteSettings()
@@ -49,15 +51,6 @@ export async function generateMetadata(props): Promise<Metadata | undefined> {
       images: [ogImage],
     },
   }
-}
-
-export async function generateStaticParams() {
-  let getPost = await getBlogPosts()
-  getPost = getPost.filter((post) => post.metadata.category === 'Daily')
-
-  return getPost.map((post) => ({
-    slug: post.slug,
-  }))
 }
 
 export default async function Daily(props) {

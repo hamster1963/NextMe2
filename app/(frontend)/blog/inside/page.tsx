@@ -1,6 +1,8 @@
 import TypeSwitch from '../type-switch'
 import InsideList from './inside-list'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Inside',
   description: 'Just about anything that comes to mind.',

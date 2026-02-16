@@ -1,6 +1,8 @@
 import BlogList from './blog-list'
 import TypeSwitch from './type-switch'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Blog',
   description: 'Read my thoughts on software development, design, and more.',

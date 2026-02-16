@@ -1,6 +1,8 @@
 import TypeSwitch from '../type-switch'
 import DailyList from './daily-list'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Daily',
   description:
