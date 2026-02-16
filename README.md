@@ -29,9 +29,3 @@ First-run flow is automatic:
 Data persistence:
 
 - SQLite file is persisted to local `./data` via compose volume.
-
-If GHCR package is private:
-
-```bash
-docker login ghcr.io
-```

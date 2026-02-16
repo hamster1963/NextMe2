@@ -29,9 +29,3 @@ docker compose up -d
 数据持久化：
 
 - SQLite 会通过 Compose volume 持久化到本地 `./data` 目录
-
-如果 GHCR 是私有仓库：
-
-```bash
-docker login ghcr.io
-```
