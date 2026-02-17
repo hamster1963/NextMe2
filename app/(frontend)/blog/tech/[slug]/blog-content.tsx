@@ -1,4 +1,5 @@
 import defaultAvatar from 'app/avatar.webp'
+import CommentsPanel from 'app/blog/_components/comments-panel'
 import PayloadRichTextContent from 'app/components/payload-richtext'
 import { getBlogPostHref, getBlogPosts } from 'app/db/blog'
 import { slugify } from 'app/lib/slugify'
@@ -201,6 +202,7 @@ export default async function BlogContent({
           </ul>
         </section>
       )}
+      <CommentsPanel slug={post.slug} allowSubmit={!isPreviewMode} />
       <TOC headings={headings} />
     </>
   )
