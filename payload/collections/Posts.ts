@@ -31,6 +31,7 @@ type PostPreviewData = {
   id?: unknown
   category?: unknown
   slug?: unknown
+  title?: unknown
 }
 
 function getPreviewDocId(data?: PostPreviewData | null) {
@@ -58,7 +59,23 @@ function getPreviewSlug(data?: PostPreviewData | null) {
     return data.slug.trim()
   }
 
+  if (typeof data.title === 'string' && data.title.trim().length > 0) {
+    return normalizeSlug(data.title)
+  }
+
   return getPreviewDocId(data)
+}
+
+function getPreviewTitle(data?: PostPreviewData | null) {
+  if (!data) {
+    return undefined
+  }
+
+  if (typeof data.title === 'string' && data.title.trim().length > 0) {
+    return data.title.trim()
+  }
+
+  return undefined
 }
 
 function normalizeSlug(value: string) {
@@ -76,6 +93,7 @@ function resolvePreviewPath(data?: PostPreviewData | null) {
   const categoryPath = CATEGORY_PATH_MAP[normalizedCategory] || 'tech'
   const previewSlug = getPreviewSlug(data)
   const previewDocId = getPreviewDocId(data)
+  const previewTitle = getPreviewTitle(data)
 
   const params = new URLSearchParams()
   if (PREVIEW_SECRET) {
@@ -84,6 +102,9 @@ function resolvePreviewPath(data?: PostPreviewData | null) {
   params.set('previewLocked', '1')
   if (previewDocId) {
     params.set('previewDocId', previewDocId)
+  }
+  if (previewTitle) {
+    params.set('previewTitle', previewTitle)
   }
 
   const query = params.size > 0 ? `?${params.toString()}` : ''

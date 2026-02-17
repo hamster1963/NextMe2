@@ -6,6 +6,7 @@ type PreviewSearchParams = {
   [key: string]: string | string[] | undefined
   previewSecret?: string | string[]
   previewDocId?: string | string[]
+  previewTitle?: string | string[]
 }
 
 function firstValue(value: string | string[] | undefined): string | undefined {
@@ -24,6 +25,10 @@ export function getPreviewDocId(searchParams: PreviewSearchParams) {
   return firstValue(searchParams.previewDocId)
 }
 
+export function getPreviewTitle(searchParams: PreviewSearchParams) {
+  return firstValue(searchParams.previewTitle)
+}
+
 export function buildLockedPreviewPath({
   section,
   slug,
@@ -36,12 +41,16 @@ export function buildLockedPreviewPath({
   const params = new URLSearchParams()
   const previewSecret = getPreviewSecret(searchParams)
   const previewDocId = getPreviewDocId(searchParams)
+  const previewTitle = getPreviewTitle(searchParams)
 
   if (previewSecret) {
     params.set('previewSecret', previewSecret)
   }
   if (previewDocId) {
     params.set('previewDocId', previewDocId)
+  }
+  if (previewTitle) {
+    params.set('previewTitle', previewTitle)
   }
 
   params.set('previewLocked', '1')

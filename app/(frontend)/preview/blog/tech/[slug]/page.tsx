@@ -3,6 +3,7 @@ import PreviewLock from '../../_components/preview-lock'
 import {
   buildLockedPreviewPath,
   getPreviewDocId,
+  getPreviewTitle,
   requirePreviewAccess,
 } from '../../_lib/require-preview-access'
 
@@ -10,6 +11,7 @@ export default async function TechPreview(props) {
   const params = await props.params
   const searchParams = (await props.searchParams) || {}
   const previewDocId = getPreviewDocId(searchParams)
+  const previewTitle = getPreviewTitle(searchParams)
 
   requirePreviewAccess(searchParams)
   const lockedPreviewPath = buildLockedPreviewPath({
@@ -25,6 +27,7 @@ export default async function TechPreview(props) {
         slug={params.slug}
         includeDraft
         previewDocId={previewDocId}
+        previewTitle={previewTitle}
         previewReloadPath={lockedPreviewPath}
       />
     </section>

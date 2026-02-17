@@ -31,6 +31,7 @@ type BlogContentProps = {
   includeDraft?: boolean
   previewReloadPath?: string
   previewDocId?: string
+  previewTitle?: string
 }
 
 export default async function BlogContent({
@@ -38,6 +39,7 @@ export default async function BlogContent({
   includeDraft = false,
   previewReloadPath,
   previewDocId,
+  previewTitle,
 }: BlogContentProps) {
   const getPost = await getBlogPosts({ includeDraft })
   const {
@@ -56,6 +58,12 @@ export default async function BlogContent({
   if (!post && previewDocId) {
     post = getPost.find((item) => item.id === previewDocId)
   }
+  if (!post && previewTitle) {
+    const normalizedPreviewTitle = previewTitle.trim().toLowerCase()
+    post = getPost.find(
+      (item) => item.metadata.title.trim().toLowerCase() === normalizedPreviewTitle
+    )
+  }
 
   let placeholderImage: {
     placeholder: { hex: string }
@@ -71,6 +79,21 @@ export default async function BlogContent({
   }
 
   if (!post) {
+    if (includeDraft && previewReloadPath) {
+      return (
+        <section className="flex min-h-[50vh] items-center justify-center px-4 py-12 text-center">
+          <div className="max-w-md space-y-3">
+            <h1 className="font-medium text-xl tracking-tight">
+              Live preview is preparing
+            </h1>
+            <p className="text-neutral-600 text-sm dark:text-neutral-400">
+              Keep editing or save once. The preview will refresh automatically.
+            </p>
+          </div>
+        </section>
+      )
+    }
+
     notFound()
   }
 
