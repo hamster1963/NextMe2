@@ -28,8 +28,37 @@ const CATEGORY_PATH_MAP: Record<string, string> = {
 }
 
 type PostPreviewData = {
+  id?: unknown
   category?: unknown
   slug?: unknown
+}
+
+function getPreviewDocId(data?: PostPreviewData | null) {
+  if (!data) {
+    return undefined
+  }
+
+  if (typeof data.id === 'number') {
+    return data.id.toString()
+  }
+
+  if (typeof data.id === 'string' && data.id.trim().length > 0) {
+    return data.id.trim()
+  }
+
+  return undefined
+}
+
+function getPreviewSlug(data?: PostPreviewData | null) {
+  if (!data) {
+    return undefined
+  }
+
+  if (typeof data.slug === 'string' && data.slug.trim().length > 0) {
+    return data.slug.trim()
+  }
+
+  return getPreviewDocId(data)
 }
 
 function normalizeSlug(value: string) {
@@ -42,22 +71,28 @@ function normalizeSlug(value: string) {
 }
 
 function resolvePreviewPath(data?: PostPreviewData | null) {
-  if (!data || typeof data.slug !== 'string' || data.slug.length === 0) {
-    return null
-  }
-
   const normalizedCategory =
-    typeof data.category === 'string' ? data.category.toLowerCase() : 'tech'
+    typeof data?.category === 'string' ? data.category.toLowerCase() : 'tech'
   const categoryPath = CATEGORY_PATH_MAP[normalizedCategory] || 'tech'
+  const previewSlug = getPreviewSlug(data)
+  const previewDocId = getPreviewDocId(data)
 
   const params = new URLSearchParams()
   if (PREVIEW_SECRET) {
     params.set('previewSecret', PREVIEW_SECRET)
   }
   params.set('previewLocked', '1')
+  if (previewDocId) {
+    params.set('previewDocId', previewDocId)
+  }
 
-  const encodedSlug = encodeURIComponent(data.slug)
   const query = params.size > 0 ? `?${params.toString()}` : ''
+
+  if (!previewSlug) {
+    return `/preview/blog/pending${query}`
+  }
+
+  const encodedSlug = encodeURIComponent(previewSlug)
 
   return `/preview/blog/${categoryPath}/${encodedSlug}${query}`
 }

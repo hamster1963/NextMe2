@@ -22,6 +22,7 @@ export type RelatedBlogPost = {
 }
 
 export type BlogPost = {
+  id: string
   metadata: BlogMetadata
   slug: string
   richContent: Record<string, any>
@@ -192,14 +193,18 @@ function toRelatedBlogPost(value: unknown): RelatedBlogPost | null {
 function toBlogPostFromPayload(
   payloadDoc: Record<string, any>
 ): BlogPost | null {
-  const slug =
-    typeof payloadDoc.slug === 'string'
-      ? payloadDoc.slug
-      : typeof payloadDoc.id === 'string' || typeof payloadDoc.id === 'number'
-        ? payloadDoc.id.toString()
-        : undefined
+  const resolvedId =
+    typeof payloadDoc.id === 'string' || typeof payloadDoc.id === 'number'
+      ? payloadDoc.id.toString()
+      : undefined
 
-  if (!slug) {
+  const slug =
+    typeof payloadDoc.slug === 'string' && payloadDoc.slug.length > 0
+      ? payloadDoc.slug
+      : resolvedId
+  const id = resolvedId || slug
+
+  if (!slug || !id) {
     return null
   }
 
@@ -258,6 +263,7 @@ function toBlogPostFromPayload(
     : []
 
   return {
+    id,
     metadata,
     slug,
     richContent,

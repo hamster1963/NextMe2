@@ -29,12 +29,14 @@ type DailyContentProps = {
   slug: string
   includeDraft?: boolean
   previewReloadPath?: string
+  previewDocId?: string
 }
 
 export default async function DailyContent({
   slug,
   includeDraft = false,
   previewReloadPath,
+  previewDocId,
 }: DailyContentProps) {
   const getPost = await getBlogPosts({ includeDraft })
   const {
@@ -49,7 +51,10 @@ export default async function DailyContent({
   if (!getPost) {
     notFound()
   }
-  const post = getPost.find((post) => post.slug === slug)
+  let post = getPost.find((post) => post.slug === slug)
+  if (!post && previewDocId) {
+    post = getPost.find((item) => item.id === previewDocId)
+  }
 
   if (!post) {
     notFound()

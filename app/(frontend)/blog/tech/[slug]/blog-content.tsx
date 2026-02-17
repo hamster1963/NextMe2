@@ -30,12 +30,14 @@ type BlogContentProps = {
   slug: string
   includeDraft?: boolean
   previewReloadPath?: string
+  previewDocId?: string
 }
 
 export default async function BlogContent({
   slug,
   includeDraft = false,
   previewReloadPath,
+  previewDocId,
 }: BlogContentProps) {
   const getPost = await getBlogPosts({ includeDraft })
   const {
@@ -50,7 +52,10 @@ export default async function BlogContent({
   if (!getPost) {
     notFound()
   }
-  const post = getPost.find((post) => post.slug === slug)
+  let post = getPost.find((post) => post.slug === slug)
+  if (!post && previewDocId) {
+    post = getPost.find((item) => item.id === previewDocId)
+  }
 
   let placeholderImage: {
     placeholder: { hex: string }

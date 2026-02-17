@@ -5,6 +5,7 @@ const PREVIEW_SECRET = process.env.PAYLOAD_SECRET || 'dev-payload-secret'
 type PreviewSearchParams = {
   [key: string]: string | string[] | undefined
   previewSecret?: string | string[]
+  previewDocId?: string | string[]
 }
 
 function firstValue(value: string | string[] | undefined): string | undefined {
@@ -19,6 +20,10 @@ export function getPreviewSecret(searchParams: PreviewSearchParams) {
   return firstValue(searchParams.previewSecret)
 }
 
+export function getPreviewDocId(searchParams: PreviewSearchParams) {
+  return firstValue(searchParams.previewDocId)
+}
+
 export function buildLockedPreviewPath({
   section,
   slug,
@@ -30,9 +35,13 @@ export function buildLockedPreviewPath({
 }) {
   const params = new URLSearchParams()
   const previewSecret = getPreviewSecret(searchParams)
+  const previewDocId = getPreviewDocId(searchParams)
 
   if (previewSecret) {
     params.set('previewSecret', previewSecret)
+  }
+  if (previewDocId) {
+    params.set('previewDocId', previewDocId)
   }
 
   params.set('previewLocked', '1')

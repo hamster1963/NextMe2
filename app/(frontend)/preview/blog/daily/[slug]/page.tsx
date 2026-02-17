@@ -2,12 +2,14 @@ import DailyContent from 'app/blog/daily/[slug]/blog-content'
 import PreviewLock from '../../_components/preview-lock'
 import {
   buildLockedPreviewPath,
+  getPreviewDocId,
   requirePreviewAccess,
 } from '../../_lib/require-preview-access'
 
 export default async function DailyPreview(props) {
   const params = await props.params
   const searchParams = (await props.searchParams) || {}
+  const previewDocId = getPreviewDocId(searchParams)
 
   requirePreviewAccess(searchParams)
   const lockedPreviewPath = buildLockedPreviewPath({
@@ -22,6 +24,7 @@ export default async function DailyPreview(props) {
       <DailyContent
         slug={params.slug}
         includeDraft
+        previewDocId={previewDocId}
         previewReloadPath={lockedPreviewPath}
       />
     </section>
