@@ -2,7 +2,7 @@ import { getSiteSettings } from 'app/db/site-settings'
 import TypeSwitch from '../type-switch'
 import DailyList from './daily-list'
 
-export const revalidate = 300
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata() {
   const { blogDailyDescription, blogDailyLabel } = await getSiteSettings()

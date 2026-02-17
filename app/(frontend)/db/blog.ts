@@ -1,5 +1,3 @@
-import { unstable_cache } from 'next/cache'
-
 export type BlogMetadata = {
   title: string
   publishedAt: string
@@ -325,19 +323,7 @@ async function fetchBlogPosts(includeDraft: boolean): Promise<BlogPost[]> {
   return posts
 }
 
-const getPublishedBlogPosts = unstable_cache(
-  async () => fetchBlogPosts(false),
-  ['blog-posts'],
-  {
-    tags: ['blog-posts'],
-    revalidate: 300,
-  }
-)
-
 export async function getBlogPosts(options: GetBlogPostsOptions = {}) {
   const includeDraft = options.includeDraft ?? false
-  if (includeDraft) {
-    return fetchBlogPosts(true)
-  }
-  return getPublishedBlogPosts()
+  return fetchBlogPosts(includeDraft)
 }

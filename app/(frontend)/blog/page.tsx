@@ -2,7 +2,7 @@ import { getSiteSettings } from '../db/site-settings'
 import BlogList from './blog-list'
 import TypeSwitch from './type-switch'
 
-export const revalidate = 300
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata() {
   const { blogTechDescription, blogTechLabel } = await getSiteSettings()

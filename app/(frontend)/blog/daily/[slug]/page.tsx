@@ -7,7 +7,7 @@ import {
 import type { Metadata } from 'next'
 import DailyContent from './blog-content'
 
-export const revalidate = 300
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(props): Promise<Metadata | undefined> {
   const params = await props.params
