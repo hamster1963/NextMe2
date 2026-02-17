@@ -20,6 +20,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN --mount=type=cache,id=next-cache,target=/app/.next/cache \
   pnpm build
+RUN pnpm prune --prod
+RUN rm -rf /app/.next/cache /app/.next/standalone
 
 FROM base AS runner
 
@@ -28,8 +30,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 WORKDIR /app
 
-COPY --from=builder /app ./
-RUN pnpm prune --prod
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/payload ./payload
+COPY --from=builder /app/payload.config.ts ./payload.config.ts
+COPY --from=builder /app/scripts/bootstrap-payload-db.mjs ./scripts/bootstrap-payload-db.mjs
 RUN mkdir -p /app/data /app/data/media
 
 EXPOSE 3052
