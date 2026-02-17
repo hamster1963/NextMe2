@@ -5,7 +5,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 
-import { FireIcon, HomeIcon } from '@heroicons/react/20/solid'
+import {
+  ChatBubbleLeftRightIcon,
+  FireIcon,
+  HomeIcon,
+} from '@heroicons/react/20/solid'
 
 type NavProps = {
   homeLabel: string
@@ -25,11 +29,25 @@ export default function Nav({ homeLabel, blogLabel }: NavProps) {
       url: '/blog',
       icon: FireIcon,
     },
+    {
+      name: 'Guestbook',
+      url: '/guestbook',
+      icon: ChatBubbleLeftRightIcon,
+    },
   ]
 
   const isActive = useMemo(() => {
-    return (url: string) =>
-      _nowPath === url || (_nowPath.includes('/blog') && url.includes('/blog'))
+    return (url: string) => {
+      if (url === '/blog') {
+        return _nowPath.includes('/blog')
+      }
+
+      if (url === '/guestbook') {
+        return _nowPath === '/guestbook'
+      }
+
+      return _nowPath === url
+    }
   }, [_nowPath])
 
   // Keep nav and gradient layer always visible

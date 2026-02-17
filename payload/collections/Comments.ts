@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '../access/anyone.ts'
 import { authenticated } from '../access/authenticated.ts'
 
+const COMMENT_SCOPE_POST = 'post'
+const COMMENT_SCOPE_GUESTBOOK = 'guestbook'
+
 export const Comments: CollectionConfig = {
   slug: 'comments',
   access: {
@@ -23,13 +26,21 @@ export const Comments: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'authorName',
-    defaultColumns: ['authorName', 'post', 'status', 'createdAt'],
+    defaultColumns: ['authorName', 'scope', 'post', 'status', 'createdAt'],
   },
   hooks: {
     beforeChange: [
       ({ data, originalDoc, req }) => {
         if (!data || typeof data !== 'object') {
           return data
+        }
+
+        if (data.scope === COMMENT_SCOPE_GUESTBOOK) {
+          data.post = undefined
+        }
+
+        if (typeof data.scope !== 'string' || data.scope.length === 0) {
+          data.scope = COMMENT_SCOPE_POST
         }
 
         const nextReply =
@@ -61,11 +72,44 @@ export const Comments: CollectionConfig = {
   },
   fields: [
     {
+      name: 'scope',
+      type: 'select',
+      required: true,
+      defaultValue: COMMENT_SCOPE_POST,
+      options: [
+        {
+          label: 'Post',
+          value: COMMENT_SCOPE_POST,
+        },
+        {
+          label: 'Guestbook',
+          value: COMMENT_SCOPE_GUESTBOOK,
+        },
+      ],
+      admin: {
+        description: 'Choose where this comment belongs.',
+      },
+    },
+    {
       name: 'post',
       type: 'relationship',
       relationTo: 'posts',
-      required: true,
       index: true,
+      admin: {
+        condition: (_, siblingData) =>
+          siblingData?.scope !== COMMENT_SCOPE_GUESTBOOK,
+      },
+      validate: (value, { siblingData }) => {
+        if (siblingData?.scope === COMMENT_SCOPE_GUESTBOOK) {
+          return true
+        }
+
+        if (value) {
+          return true
+        }
+
+        return 'Post is required when scope is Post.'
+      },
     },
     {
       name: 'authorName',

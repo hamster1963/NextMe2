@@ -16,7 +16,8 @@ type BlogComment = {
 }
 
 type CommentsPanelProps = {
-  slug: string
+  slug?: string
+  scope?: 'post' | 'guestbook'
   allowSubmit?: boolean
   className?: string
 }
@@ -40,6 +41,7 @@ function formatDate(value?: string) {
 
 export default function CommentsPanel({
   slug,
+  scope = 'post',
   allowSubmit = true,
   className,
 }: CommentsPanelProps) {
@@ -58,8 +60,14 @@ export default function CommentsPanel({
     setError(null)
 
     try {
+      const params = new URLSearchParams()
+      params.set('scope', scope)
+      if (slug) {
+        params.set('slug', slug)
+      }
+
       const res = await fetch(
-        `/api/comments?slug=${encodeURIComponent(slug)}`,
+        `/api/comments?${params.toString()}`,
         {
           method: 'GET',
           cache: 'no-store',
@@ -76,7 +84,7 @@ export default function CommentsPanel({
     } finally {
       setLoading(false)
     }
-  }, [slug])
+  }, [scope, slug])
 
   useEffect(() => {
     void loadComments()
@@ -97,6 +105,7 @@ export default function CommentsPanel({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          scope,
           slug,
           authorName,
           authorEmail,
@@ -182,70 +191,65 @@ export default function CommentsPanel({
       </div>
 
       {allowSubmit ? (
-        <div className="mt-6 rounded-2xl bg-neutral-50 p-5 dark:bg-neutral-950/35">
-          <p className="mb-4 font-medium text-neutral-600 text-sm dark:text-neutral-300">
-            Leave a comment
-          </p>
-          <form className="space-y-4" onSubmit={onSubmit}>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <input
-                type="text"
-                placeholder="Name"
-                required
-                maxLength={80}
-                value={authorName}
-                onChange={(event) => setAuthorName(event.target.value)}
-                className="w-full rounded-lg bg-white/90 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
-              />
-              <input
-                type="email"
-                placeholder="Email (optional)"
-                maxLength={120}
-                value={authorEmail}
-                onChange={(event) => setAuthorEmail(event.target.value)}
-                className="w-full rounded-lg bg-white/90 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
-              />
-            </div>
-
+        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <input
               type="text"
-              tabIndex={-1}
-              autoComplete="off"
-              value={website}
-              onChange={(event) => setWebsite(event.target.value)}
-              className="hidden"
-              aria-hidden="true"
-            />
-
-            <textarea
-              placeholder="Write your comment..."
+              placeholder="Name"
               required
-              maxLength={2000}
-              rows={4}
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
+              maxLength={80}
+              value={authorName}
+              onChange={(event) => setAuthorName(event.target.value)}
               className="w-full rounded-lg bg-white/90 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
             />
+            <input
+              type="email"
+              placeholder="Email (optional)"
+              maxLength={120}
+              value={authorEmail}
+              onChange={(event) => setAuthorEmail(event.target.value)}
+              className="w-full rounded-lg bg-white/90 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
+            />
+          </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="rounded-md bg-neutral-900 px-3 py-1.5 font-medium text-sm text-white transition hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-black"
-              >
-                {submitting ? 'Posting...' : 'Post comment'}
-              </button>
-              {successMessage && (
-                <p className="text-emerald-600 text-xs dark:text-emerald-400">
-                  {successMessage}
-                </p>
-              )}
-            </div>
-            {error && (
-              <p className="text-red-600 text-xs dark:text-red-400">{error}</p>
+          <input
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(event) => setWebsite(event.target.value)}
+            className="hidden"
+            aria-hidden="true"
+          />
+
+          <textarea
+            placeholder="Write your comment..."
+            required
+            maxLength={2000}
+            rows={4}
+            value={content}
+            onChange={(event) => setContent(event.target.value)}
+            className="w-full rounded-lg bg-white/90 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
+          />
+
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-md bg-neutral-900 px-3 py-1.5 font-medium text-sm text-white transition hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-black"
+            >
+              {submitting ? 'Posting...' : 'Post comment'}
+            </button>
+            {successMessage && (
+              <p className="text-emerald-600 text-xs dark:text-emerald-400">
+                {successMessage}
+              </p>
             )}
-          </form>
-        </div>
+          </div>
+          {error && (
+            <p className="text-red-600 text-xs dark:text-red-400">{error}</p>
+          )}
+        </form>
       ) : (
         <p className="mt-6 text-neutral-500 text-xs dark:text-neutral-400">
           Comment submission is disabled in preview mode.

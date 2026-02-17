@@ -7,6 +7,8 @@ const MAX_EMAIL_LENGTH = 120
 const MAX_CONTENT_LENGTH = 2000
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX_REQUESTS = 6
+const COMMENT_SCOPE_POST = 'post'
+const COMMENT_SCOPE_GUESTBOOK = 'guestbook'
 const requestsByIP = new Map<string, { count: number; resetAt: number }>()
 
 function toSingleValue(value: unknown): string {
@@ -42,6 +44,16 @@ function normalizeContent(value: unknown) {
 
 function normalizeSlug(value: unknown) {
   return toSingleValue(value).toLowerCase()
+}
+
+function normalizeScope(value: unknown) {
+  const scope = toSingleValue(value).toLowerCase()
+
+  if (scope === COMMENT_SCOPE_GUESTBOOK) {
+    return COMMENT_SCOPE_GUESTBOOK
+  }
+
+  return COMMENT_SCOPE_POST
 }
 
 function isValidEmail(email: string) {
@@ -112,24 +124,38 @@ async function findPublishedPostBySlug(slug: string) {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
+  const scope = normalizeScope(searchParams.get('scope'))
   const slug = normalizeSlug(searchParams.get('slug'))
 
-  if (!slug) {
+  if (scope === COMMENT_SCOPE_POST && !slug) {
     return NextResponse.json({ error: 'Missing slug' }, { status: 400 })
   }
 
-  const post = await findPublishedPostBySlug(slug)
-  if (!post) {
-    return NextResponse.json({ comments: [] }, { status: 200 })
-  }
-
   const payload = await getPayload({ config })
-  const comments = await payload.find({
-    collection: 'comments',
-    depth: 1,
-    limit: 200,
-    sort: 'createdAt',
-    where: {
+  let where: Record<string, unknown>
+
+  if (scope === COMMENT_SCOPE_GUESTBOOK) {
+    where = {
+      and: [
+        {
+          scope: {
+            equals: COMMENT_SCOPE_GUESTBOOK,
+          },
+        },
+        {
+          status: {
+            equals: 'published',
+          },
+        },
+      ],
+    }
+  } else {
+    const post = await findPublishedPostBySlug(slug)
+    if (!post) {
+      return NextResponse.json({ comments: [] }, { status: 200 })
+    }
+
+    where = {
       and: [
         {
           post: {
@@ -141,8 +167,30 @@ export async function GET(request: Request) {
             equals: 'published',
           },
         },
+        {
+          or: [
+            {
+              scope: {
+                equals: COMMENT_SCOPE_POST,
+              },
+            },
+            {
+              scope: {
+                exists: false,
+              },
+            },
+          ],
+        },
       ],
-    },
+    }
+  }
+
+  const comments = await payload.find({
+    collection: 'comments',
+    depth: 1,
+    limit: 200,
+    sort: 'createdAt',
+    where,
   })
 
   const docs = Array.isArray(comments.docs) ? comments.docs : []
@@ -187,31 +235,40 @@ export async function POST(request: Request) {
   }
 
   const slug = normalizeSlug(body?.slug)
+  const scope = normalizeScope(body?.scope)
   const authorName = normalizeName(body?.authorName)
   const authorEmail = normalizeEmail(body?.authorEmail)
   const content = normalizeContent(body?.content)
 
-  if (!slug || !authorName || !content) {
+  if (!authorName || !content) {
     return NextResponse.json(
       { error: 'Missing required fields' },
       { status: 400 }
     )
   }
 
+  if (scope === COMMENT_SCOPE_POST && !slug) {
+    return NextResponse.json({ error: 'Missing slug' }, { status: 400 })
+  }
+
   if (!isValidEmail(authorEmail)) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
   }
 
-  const post = await findPublishedPostBySlug(slug)
-  if (!post) {
-    return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+  let post: { id: string | number } | undefined
+  if (scope === COMMENT_SCOPE_POST) {
+    post = await findPublishedPostBySlug(slug)
+    if (!post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    }
   }
 
   const payload = await getPayload({ config })
   await payload.create({
     collection: 'comments',
     data: {
-      post: post.id,
+      scope,
+      post: post?.id,
       authorName,
       authorEmail: authorEmail || undefined,
       content,

@@ -11,7 +11,13 @@ export default async function sitemap() {
     lastModified: post.metadata.publishedAt,
   }))
 
-  const routes = ['', '/blog', '/blog/inside', '/blog/daily'].map((route) => ({
+  const routes = [
+    '',
+    '/blog',
+    '/blog/inside',
+    '/blog/daily',
+    '/guestbook',
+  ].map((route) => ({
     url: toAbsoluteUrl(route, siteUrl),
     lastModified: new Date().toISOString().split('T')[0],
   }))
