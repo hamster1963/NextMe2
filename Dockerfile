@@ -32,6 +32,8 @@ FROM node:22-alpine AS runner
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_PATH=/opt/libsql/node_modules
+ENV PORT=3052
+ENV HOSTNAME=0.0.0.0
 
 WORKDIR /app
 
