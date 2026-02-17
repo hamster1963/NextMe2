@@ -28,11 +28,13 @@ function extractHeadings(richContent: Record<string, any>): Heading[] {
 type BlogContentProps = {
   slug: string
   includeDraft?: boolean
+  previewReloadPath?: string
 }
 
 export default async function BlogContent({
   slug,
   includeDraft = false,
+  previewReloadPath,
 }: BlogContentProps) {
   const getPost = await getBlogPosts({ includeDraft })
   const {
@@ -68,6 +70,7 @@ export default async function BlogContent({
 
   const headings = extractHeadings(post.richContent)
   const relatedPosts = post.relatedPosts.slice(0, 3)
+  const isPreviewMode = Boolean(previewReloadPath)
   return (
     <>
       <script
@@ -97,6 +100,7 @@ export default async function BlogContent({
       <ReturnButton
         className="text-[13px] transition-opacity hover:opacity-50"
         title="Back to list"
+        reloadPreviewPath={previewReloadPath}
       />
       <h1 className="mt-0.5 mb-2 font-medium text-2xl tracking-tighter">
         {post.metadata.title}
@@ -183,7 +187,7 @@ export default async function BlogContent({
         )}
       </div>
       <PayloadRichTextContent data={post.richContent} />
-      {relatedPosts.length > 0 && (
+      {!isPreviewMode && relatedPosts.length > 0 && (
         <section className="mt-12 rounded-xl border border-neutral-200 px-5 py-4 dark:border-neutral-800">
           <h2 className="font-medium text-base tracking-tight">
             Related posts

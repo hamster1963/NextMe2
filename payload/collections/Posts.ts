@@ -54,6 +54,7 @@ function resolvePreviewPath(data?: PostPreviewData | null) {
   if (PREVIEW_SECRET) {
     params.set('previewSecret', PREVIEW_SECRET)
   }
+  params.set('previewLocked', '1')
 
   const encodedSlug = encodeURIComponent(data.slug)
   const query = params.size > 0 ? `?${params.toString()}` : ''
