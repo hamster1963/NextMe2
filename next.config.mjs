@@ -1,6 +1,7 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 
 const nextConfig = {
+  output: 'standalone',
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
   eslint: {
     ignoreDuringBuilds: true,
