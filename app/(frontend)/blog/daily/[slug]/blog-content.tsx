@@ -60,7 +60,8 @@ export default async function DailyContent({
   if (!post && previewTitle) {
     const normalizedPreviewTitle = previewTitle.trim().toLowerCase()
     post = getPost.find(
-      (item) => item.metadata.title.trim().toLowerCase() === normalizedPreviewTitle
+      (item) =>
+        item.metadata.title.trim().toLowerCase() === normalizedPreviewTitle
     )
   }
 

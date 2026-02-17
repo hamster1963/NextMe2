@@ -21,10 +21,10 @@ export default async function Page() {
 
   return (
     <main
-      className="-my-14 sm:-mt-[85px] sm:-mb-20 flex min-h-dvh flex-col justify-center"
+      className="flex min-h-[calc(100dvh-11rem)] flex-col justify-center sm:min-h-[calc(100dvh-14rem)]"
       aria-label="Personal homepage content"
     >
-      <div className="sm:mt-16 sm:px-28">
+      <div className="-mt-4 sm:-mt-8 sm:px-28">
         <Avatar
           name={profileName}
           avatarUrl={profileAvatar}
