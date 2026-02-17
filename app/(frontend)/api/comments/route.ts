@@ -189,7 +189,7 @@ export async function GET(request: Request) {
     collection: 'comments',
     depth: 1,
     limit: 200,
-    sort: 'createdAt',
+    sort: '-createdAt',
     where,
   })
 

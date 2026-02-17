@@ -29,16 +29,23 @@ export default function Footer({
   copyrightStartYear,
 }: FooterProps) {
   const pathname = usePathname()
+  const isHome = pathname === '/'
 
   const currentYear = new Intl.DateTimeFormat('en-US', {
     timeZone,
     year: 'numeric',
   }).format(new Date())
 
-  const shouldHide = pathname === '/' && !showOnHome
+  const shouldHide = isHome && !showOnHome
 
   return (
-    <footer className={cn('pt-20 sm:px-14', shouldHide && 'hidden')}>
+    <footer
+      className={cn(
+        'pt-20',
+        isHome ? 'sm:px-28' : 'sm:px-14',
+        shouldHide && 'hidden'
+      )}
+    >
       <section className="flex flex-col">
         <p className="mt-1 flex gap-1 font-light text-[13px] text-neutral-600/50 tracking-tight dark:text-neutral-300/50">
           {builtWithText}{' '}

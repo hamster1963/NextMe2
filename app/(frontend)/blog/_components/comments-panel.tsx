@@ -22,22 +22,7 @@ type CommentsPanelProps = {
   className?: string
 }
 
-function formatDate(value?: string) {
-  if (!value) {
-    return ''
-  }
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return ''
-  }
-
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
+const ANONYMOUS_NAME = 'Anonymous'
 
 export default function CommentsPanel({
   slug,
@@ -48,6 +33,7 @@ export default function CommentsPanel({
   const [comments, setComments] = useState<BlogComment[]>([])
   const [authorName, setAuthorName] = useState('')
   const [authorEmail, setAuthorEmail] = useState('')
+  const [isAnonymous, setIsAnonymous] = useState(false)
   const [content, setContent] = useState('')
   const [website, setWebsite] = useState('')
   const [loading, setLoading] = useState(true)
@@ -99,6 +85,9 @@ export default function CommentsPanel({
     setSuccessMessage(null)
 
     try {
+      const submitName = isAnonymous ? ANONYMOUS_NAME : authorName
+      const submitEmail = isAnonymous ? '' : authorEmail
+
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: {
@@ -107,8 +96,8 @@ export default function CommentsPanel({
         body: JSON.stringify({
           scope,
           slug,
-          authorName,
-          authorEmail,
+          authorName: submitName,
+          authorEmail: submitEmail,
           content,
           website,
         }),
@@ -147,7 +136,7 @@ export default function CommentsPanel({
         </button>
       </div>
 
-      <div className="rounded-2xl bg-neutral-100/70 p-5 dark:bg-neutral-900/45">
+      <div>
         {loading ? (
           <p className="text-neutral-500 text-sm dark:text-neutral-400">
             Loading comments...
@@ -157,31 +146,20 @@ export default function CommentsPanel({
             No comments yet.
           </p>
         ) : (
-          <ul className="space-y-5">
+          <ul className="space-y-2">
             {comments.map((comment) => (
-              <li key={comment.id} className="space-y-2 pb-5 last:pb-0">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="font-medium text-sm">{comment.authorName}</p>
-                  <p className="text-neutral-500 text-xs dark:text-neutral-400">
-                    {formatDate(comment.createdAt)}
-                  </p>
-                </div>
-                <p className="whitespace-pre-wrap text-neutral-800 text-sm leading-6 dark:text-neutral-200/95">
-                  {comment.content}
+              <li key={comment.id} className="space-y-4 pb-6 last:pb-0">
+                <p className="whitespace-pre-wrap text-sm leading-[1.7] tracking-[-0.01em] text-neutral-900 dark:text-neutral-100">
+                  <span className="text-neutral-500 dark:text-neutral-400">
+                    {comment.authorName}
+                  </span>
+                  : {comment.content}
                 </p>
                 {comment.reply?.content && (
-                  <div className="mt-3 rounded-lg bg-white/75 px-3 py-2.5 text-neutral-700 text-sm dark:bg-neutral-950/55 dark:text-neutral-300">
-                    <p className="mb-1 font-medium text-[10px] text-neutral-500 uppercase tracking-[0.04em] dark:text-neutral-400">
-                      Admin reply
-                    </p>
-                    <p className="whitespace-pre-wrap leading-6">
-                      {comment.reply.content}
-                    </p>
-                    {comment.reply.repliedAt && (
-                      <p className="mt-1 text-[11px] text-neutral-500 dark:text-neutral-400">
-                        {formatDate(comment.reply.repliedAt)}
-                      </p>
-                    )}
+                  <div className="flex justify-end">
+                    <div className="max-w-[88%] rounded-[8px] bg-neutral-200/85 px-2 py-1 text-sm leading-[1.6] tracking-[-0.01em] text-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-200 sm:max-w-[78%] sm:text-sm">
+                      <p className="whitespace-pre-wrap">{comment.reply.content}</p>
+                    </div>
                   </div>
                 )}
               </li>
@@ -196,11 +174,12 @@ export default function CommentsPanel({
             <input
               type="text"
               placeholder="Name"
-              required
+              required={!isAnonymous}
               maxLength={80}
               value={authorName}
               onChange={(event) => setAuthorName(event.target.value)}
-              className="w-full rounded-lg bg-white/90 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
+              disabled={isAnonymous}
+              className="w-full rounded-lg bg-neutral-100 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
             />
             <input
               type="email"
@@ -208,7 +187,8 @@ export default function CommentsPanel({
               maxLength={120}
               value={authorEmail}
               onChange={(event) => setAuthorEmail(event.target.value)}
-              className="w-full rounded-lg bg-white/90 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
+              disabled={isAnonymous}
+              className="w-full rounded-lg bg-neutral-100 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
             />
           </div>
 
@@ -229,10 +209,28 @@ export default function CommentsPanel({
             rows={4}
             value={content}
             onChange={(event) => setContent(event.target.value)}
-            className="w-full rounded-lg bg-white/90 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
+            className="w-full rounded-lg bg-neutral-100 px-3 py-2.5 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
           />
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() =>
+                setIsAnonymous((prev) => {
+                  const next = !prev
+                  if (next) {
+                    setAuthorName(ANONYMOUS_NAME)
+                    setAuthorEmail('')
+                  } else if (authorName === ANONYMOUS_NAME) {
+                    setAuthorName('')
+                  }
+                  return next
+                })
+              }
+              className="rounded-md border border-neutral-300 px-3 py-1.5 font-medium text-sm transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
+            >
+              {isAnonymous ? 'Anonymous On' : 'Anonymous'}
+            </button>
             <button
               type="submit"
               disabled={submitting}
