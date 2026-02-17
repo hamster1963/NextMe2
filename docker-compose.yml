@@ -1,6 +1,6 @@
 services:
   blog:
-    image: ghcr.io/hamster1963/nextme2:latest
+    image: hamster1963/nextme2:latest
     restart: unless-stopped
     ports:
       - "3052:3052"
