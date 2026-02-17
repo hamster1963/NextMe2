@@ -124,16 +124,14 @@ export default function CommentsPanel({
   }
 
   return (
-    <section
-      className={`mt-12 rounded-xl border border-neutral-200 p-5 dark:border-neutral-800 ${className || ''}`}
-    >
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-medium text-lg tracking-tight">
+    <section className={`mt-14 ${className || ''}`}>
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="font-medium text-base tracking-tight">
           Comments ({commentCount})
         </h2>
         <button
           type="button"
-          className="text-neutral-500 text-xs transition hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-100"
+          className="text-[11px] text-neutral-500 uppercase tracking-[0.08em] transition hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-100"
           onClick={() => void loadComments()}
         >
           Refresh
@@ -149,31 +147,28 @@ export default function CommentsPanel({
           No comments yet.
         </p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-8">
           {comments.map((comment) => (
-            <li
-              key={comment.id}
-              className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-800"
-            >
-              <div className="mb-2 flex items-center justify-between">
+            <li key={comment.id} className="space-y-2">
+              <div className="flex items-baseline justify-between gap-3">
                 <p className="font-medium text-sm">{comment.authorName}</p>
-                <p className="text-neutral-500 text-xs dark:text-neutral-400">
+                <p className="text-[11px] text-neutral-500 uppercase tracking-[0.06em] dark:text-neutral-400">
                   {formatDate(comment.createdAt)}
                 </p>
               </div>
-              <p className="whitespace-pre-wrap text-neutral-800 text-sm dark:text-neutral-200">
+              <p className="whitespace-pre-wrap text-neutral-800 text-sm leading-6 dark:text-neutral-200">
                 {comment.content}
               </p>
               {comment.reply?.content && (
-                <div className="mt-3 rounded-md border border-neutral-300 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-900">
-                  <p className="mb-1 font-medium text-neutral-600 text-xs uppercase tracking-wide dark:text-neutral-300">
+                <div className="mt-2 pl-3 text-neutral-700 text-sm dark:text-neutral-300">
+                  <p className="mb-1 font-medium text-[10px] text-neutral-500 uppercase tracking-[0.08em] dark:text-neutral-400">
                     Admin reply
                   </p>
-                  <p className="whitespace-pre-wrap text-neutral-800 text-sm dark:text-neutral-200">
+                  <p className="whitespace-pre-wrap leading-6">
                     {comment.reply.content}
                   </p>
                   {comment.reply.repliedAt && (
-                    <p className="mt-1 text-neutral-500 text-xs dark:text-neutral-400">
+                    <p className="mt-1 text-[11px] text-neutral-500 dark:text-neutral-400">
                       {formatDate(comment.reply.repliedAt)}
                     </p>
                   )}
@@ -185,8 +180,15 @@ export default function CommentsPanel({
       )}
 
       {allowSubmit ? (
-        <form className="mt-6 space-y-3" onSubmit={onSubmit}>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mt-10">
+          <div className="mb-6">
+            <div className="h-px w-full bg-neutral-200/80 dark:bg-neutral-800/80" />
+            <p className="mt-3 text-[11px] text-neutral-500 uppercase tracking-[0.08em] dark:text-neutral-400">
+              Leave a comment
+            </p>
+          </div>
+          <form className="space-y-4" onSubmit={onSubmit}>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <input
               type="text"
               placeholder="Name"
@@ -194,7 +196,7 @@ export default function CommentsPanel({
               maxLength={80}
               value={authorName}
               onChange={(event) => setAuthorName(event.target.value)}
-              className="rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-neutral-500 dark:border-neutral-700 dark:bg-neutral-950"
+              className="w-full bg-transparent px-0 py-2 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-neutral-50/60 dark:focus:bg-neutral-900/50"
             />
             <input
               type="email"
@@ -202,7 +204,7 @@ export default function CommentsPanel({
               maxLength={120}
               value={authorEmail}
               onChange={(event) => setAuthorEmail(event.target.value)}
-              className="rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-neutral-500 dark:border-neutral-700 dark:bg-neutral-950"
+              className="w-full bg-transparent px-0 py-2 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-neutral-50/60 dark:focus:bg-neutral-900/50"
             />
           </div>
 
@@ -223,27 +225,28 @@ export default function CommentsPanel({
             rows={4}
             value={content}
             onChange={(event) => setContent(event.target.value)}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-neutral-500 dark:border-neutral-700 dark:bg-neutral-950"
+            className="w-full bg-transparent px-0 py-2 text-sm placeholder:text-neutral-400 outline-none transition focus:bg-neutral-50/60 dark:focus:bg-neutral-900/50"
           />
 
           <div className="flex items-center gap-3">
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-md bg-black px-4 py-2 text-sm text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
+              className="font-medium text-sm underline underline-offset-4 transition-opacity hover:opacity-60 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {submitting ? 'Posting...' : 'Post comment'}
             </button>
             {successMessage && (
               <p className="text-emerald-600 text-xs dark:text-emerald-400">
-                {successMessage}
-              </p>
-            )}
-          </div>
-          {error && (
-            <p className="text-red-600 text-xs dark:text-red-400">{error}</p>
+              {successMessage}
+            </p>
           )}
-        </form>
+        </div>
+        {error && (
+          <p className="text-red-600 text-xs dark:text-red-400">{error}</p>
+        )}
+          </form>
+        </div>
       ) : (
         <p className="mt-6 text-neutral-500 text-xs dark:text-neutral-400">
           Comment submission is disabled in preview mode.
