@@ -10,6 +10,8 @@ import Nav from './components/nav'
 import { getSiteSettings } from './db/site-settings'
 import Footer from './footer'
 
+export const revalidate = 300
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -60,15 +62,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const cx = (...classes: string[]) => classes.filter(Boolean).join(' ')
+const toHtmlLang = (locale: string) => locale.replace(/_/g, '-')
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const settings = await getSiteSettings()
+
   return (
     <html
-      lang="en"
+      lang={toHtmlLang(settings.locale)}
       className={cx(
         'bg-white text-black dark:bg-[#111010] dark:text-white',
         GeistSans.variable,
@@ -80,8 +85,22 @@ export default async function RootLayout({
           <main className="flex min-w-0 flex-auto flex-col px-2 pt-8 md:px-0">
             <LivePreviewListener />
             {children}
-            <Nav />
-            <Footer />
+            <Nav
+              homeLabel={settings.navHomeLabel}
+              blogLabel={settings.navBlogLabel}
+            />
+            <Footer
+              showOnHome={settings.footerShowOnHome}
+              timeZone={settings.timeZone}
+              builtWithText={settings.footerBuiltWithText}
+              primaryLinkLabel={settings.footerPrimaryLinkLabel}
+              primaryLinkUrl={settings.footerPrimaryLinkUrl}
+              secondaryLinkLabel={settings.footerSecondaryLinkLabel}
+              secondaryLinkUrl={settings.footerSecondaryLinkUrl}
+              ownerLabel={settings.footerOwnerLabel}
+              ownerUrl={settings.footerOwnerUrl}
+              copyrightStartYear={settings.footerCopyrightStartYear}
+            />
           </main>
         </MotionProvider>
       </body>

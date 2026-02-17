@@ -1,23 +1,28 @@
 import clsx from 'clsx'
 import InsideListLink from './[slug]/inside-list-link'
 
-function blogPostDate(date: string) {
+function blogPostDate(date: string, dateLocale: string, timeZone: string) {
   let dateString = date
   if (!dateString.includes('T')) {
     dateString = `${dateString}T00:00:00`
   }
-  return new Date(dateString).toLocaleDateString('zh-CN', {
+  return new Date(dateString).toLocaleDateString(dateLocale, {
     year: 'numeric',
     month: 'long',
+    timeZone,
   })
 }
 
 export default function InsideListClient({
   Blogs,
   placeholderImageBlogMap,
+  dateLocale,
+  timeZone,
 }: {
   Blogs
   placeholderImageBlogMap
+  dateLocale: string
+  timeZone: string
 }) {
   return (
     <section className={'mt-3'}>
@@ -39,7 +44,7 @@ export default function InsideListClient({
                   >
                     <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/5 ring-inset dark:ring-white/5" />
                     <img
-                      alt={'Hamster1963'}
+                      alt={post.metadata.title}
                       className="rounded-xl object-cover"
                       src={post.metadata.image}
                       width={
@@ -59,7 +64,11 @@ export default function InsideListClient({
                 </p>
                 <div className="flex items-center gap-1">
                   <p className="text-neutral-600 text-xs dark:text-neutral-400">
-                    {blogPostDate(post.metadata.publishedAt)}
+                    {blogPostDate(
+                      post.metadata.publishedAt,
+                      dateLocale,
+                      timeZone
+                    )}
                   </p>
                 </div>
               </div>

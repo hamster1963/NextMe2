@@ -1,9 +1,11 @@
 import BlogListClient from 'app/components/blog-list-client'
 import { getPlaceholderColorFromLocal } from 'lib/images'
 import { getBlogPosts } from '../db/blog'
+import { getSiteSettings } from '../db/site-settings'
 
 export default async function BlogList() {
   let allBlogs = await getBlogPosts()
+  const { dateLocale, timeZone } = await getSiteSettings()
 
   allBlogs = allBlogs.filter((post) => post.metadata.category === 'Tech')
 
@@ -39,6 +41,8 @@ export default async function BlogList() {
       firstBlog={firstBlog}
       restBlogs={restBlogs}
       placeholderImageBlogMap={placeholderImageBlogMap}
+      dateLocale={dateLocale}
+      timeZone={timeZone}
     />
   )
 }

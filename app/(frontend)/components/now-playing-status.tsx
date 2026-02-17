@@ -10,10 +10,14 @@ export default function NowPlayingStatus({
   play_state,
   play_percent,
   timestamp,
+  dateLocale = 'en-US',
+  timeZone = 'UTC',
 }: {
   play_state: boolean
   play_percent: number
   timestamp: number
+  dateLocale?: string
+  timeZone?: string
 }) {
   const [isClient, setIsClient] = useState(false)
 
@@ -45,11 +49,11 @@ export default function NowPlayingStatus({
     isExpired = diff >= 60 * 1000
 
     if (isExpired) {
-      const formattedDate = lastPlayedDate.toLocaleDateString('en-US', {
+      const formattedDate = lastPlayedDate.toLocaleDateString(dateLocale, {
         weekday: 'short',
         hour: 'numeric',
         minute: 'numeric',
-        timeZone: 'Asia/Shanghai',
+        timeZone,
         hour12: true,
       })
       lastPlayedString = ` ${formattedDate}`

@@ -30,7 +30,7 @@ WORKDIR /app
 
 COPY --from=builder /app ./
 RUN pnpm prune --prod
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data /app/data/media
 
 EXPOSE 3052
 

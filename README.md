@@ -26,6 +26,32 @@ First-run flow is automatic:
 - `/setup` guides the user to open `/admin` and create the first admin account.
 - After creating the first admin account, configure `Globals -> Site Settings` and then `/setup` will redirect back to `/`.
 
+Recommended `Globals -> Site Settings` fields:
+
+- Basic: `siteName`, `siteUrl`, `description`
+- Profile: `profileName`, `profileTagline`, `introLines`, `profileAvatar`
+- Navigation: `navHomeLabel`, `navBlogLabel`
+- Blog sections: `blogTechLabel` / `blogInsideLabel` / `blogDailyLabel` and their `...Description` fields
+- Date/Time: `dateLocale`, `timeZone`
+- Footer: `footerBuiltWithText`, link labels/URLs, owner label/URL, `footerCopyrightStartYear`, `footerShowOnHome`
+
 Data persistence:
 
 - SQLite file is persisted to local `./data` via compose volume.
+- Uploaded media files are persisted to `./data/media`.
+- Payload will block deleting media that is still referenced by posts or profile avatar.
+- GraphQL endpoints are disabled; frontend content rendering uses embedded Payload Local API.
+
+Optional backup / restore:
+
+```bash
+# Backup
+docker compose stop
+./scripts/backup-data.sh ./data ./backups
+docker compose up -d
+
+# Restore
+docker compose stop
+./scripts/restore-data.sh ./backups/<backup-file>.tar.gz ./data
+docker compose up -d
+```

@@ -1,8 +1,7 @@
-import createMDX from '@next/mdx'
 import { withPayload } from '@payloadcms/next/withPayload'
 
 const nextConfig = {
-  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -26,8 +25,6 @@ const nextConfig = {
   },
 }
 
-const withMDX = createMDX({})
-
-export default withPayload(withMDX(nextConfig), {
+export default withPayload(nextConfig, {
   devBundleServerPackages: false,
 })

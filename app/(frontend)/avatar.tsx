@@ -5,7 +5,17 @@ import { type MotionProps, m as motion, useSpring } from 'framer-motion'
 import Image from 'next/image'
 import { useRef } from 'react'
 
-export default function Avatar() {
+type AvatarProps = {
+  name?: string
+  avatarUrl?: string
+  avatarAlt?: string
+}
+
+export default function Avatar({
+  name = 'Profile',
+  avatarUrl,
+  avatarAlt,
+}: AvatarProps) {
   const avatarRef = useRef<HTMLDivElement>(null)
   const x = useSpring(0, {
     stiffness: 400,
@@ -49,16 +59,27 @@ export default function Avatar() {
         whileTap={{ scale: 1.1 }}
         className="relative z-50 h-14 w-14 cursor-grab overflow-hidden rounded-full border-[1px] border-neutral-200 transition-opacity active:cursor-grabbing dark:border-none dark:brightness-90"
       >
-        <Image
-          alt={'Hamster1963'}
-          src={avatar}
-          height={64}
-          width={64}
-          sizes="33vw"
-          placeholder="blur"
-          priority
-          draggable={false}
-        />
+        {avatarUrl ? (
+          <img
+            alt={avatarAlt || `${name} avatar`}
+            src={avatarUrl}
+            height={64}
+            width={64}
+            className="h-full w-full object-cover"
+            draggable={false}
+          />
+        ) : (
+          <Image
+            alt={avatarAlt || `${name} avatar`}
+            src={avatar}
+            height={64}
+            width={64}
+            sizes="33vw"
+            placeholder="blur"
+            priority
+            draggable={false}
+          />
+        )}
       </motion.div>
     </div>
   )

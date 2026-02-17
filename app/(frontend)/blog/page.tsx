@@ -1,21 +1,39 @@
+import { getSiteSettings } from '../db/site-settings'
 import BlogList from './blog-list'
 import TypeSwitch from './type-switch'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
-export const metadata = {
-  title: 'Blog',
-  description: 'Read my thoughts on software development, design, and more.',
+export async function generateMetadata() {
+  const { blogTechDescription, blogTechLabel } = await getSiteSettings()
+
+  return {
+    title: blogTechLabel,
+    description: blogTechDescription,
+  }
 }
 
 export default async function BlogPage() {
+  const {
+    blogTechLabel,
+    blogTechDescription,
+    blogInsideLabel,
+    blogDailyLabel,
+  } = await getSiteSettings()
+
   return (
     <section className="sm:px-14 sm:pt-6">
-      <h1 className="mb-2 font-medium text-2xl tracking-tighter">Blog</h1>
+      <h1 className="mb-2 font-medium text-2xl tracking-tighter">
+        {blogTechLabel}
+      </h1>
       <p className="prose prose-neutral dark:prose-invert mb-2 text-sm">
-        A collection of posts.
+        {blogTechDescription}
       </p>
-      <TypeSwitch />
+      <TypeSwitch
+        techLabel={blogTechLabel}
+        insideLabel={blogInsideLabel}
+        dailyLabel={blogDailyLabel}
+      />
       <BlogList />
     </section>
   )

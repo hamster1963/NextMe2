@@ -1,3 +1,5 @@
+import { unstable_cache } from 'next/cache'
+
 export type BlogMetadata = {
   title: string
   publishedAt: string
@@ -5,15 +7,25 @@ export type BlogMetadata = {
   summary: string
   image?: string
   category: string
+  categories: string[]
   ai?: string
   rssImage?: string
+  seoTitle?: string
+  seoDescription?: string
+  seoImage?: string
+}
+
+export type RelatedBlogPost = {
+  slug: string
+  title: string
+  category: string
 }
 
 export type BlogPost = {
   metadata: BlogMetadata
   slug: string
-  tweetIds: string[]
-  content: string
+  richContent: Record<string, any>
+  relatedPosts: RelatedBlogPost[]
 }
 
 const DEFAULT_COLLECTION = 'posts'
@@ -25,25 +37,35 @@ const CATEGORY_MAP = {
   daily: 'Daily',
 } as const
 
-function extractTweetIds(content: string) {
-  const tweetMatches = content.match(/<StaticTweet\sid="[0-9]+"\s\/>/g)
-  return (
-    tweetMatches
-      ?.map((tweet: string) => {
-        const match = tweet.match(/[0-9]+/g)
-        return match ? match[0] : null
-      })
-      .filter((id): id is string => id !== null) || []
-  )
-}
-
-function normalizeCategory(rawCategory: unknown) {
+function normalizeCategory(rawCategory: unknown): string {
   if (typeof rawCategory !== 'string') {
     return 'Tech'
   }
 
   const normalized = rawCategory.trim().toLowerCase()
   return CATEGORY_MAP[normalized] || rawCategory
+}
+
+function resolveCategoryPath(category: string): string {
+  const normalized = category.toLowerCase()
+  if (normalized === 'inside') {
+    return 'inside'
+  }
+  if (normalized === 'daily') {
+    return 'daily'
+  }
+  return 'tech'
+}
+
+type BlogPostPathSource = {
+  slug: string
+  metadata: {
+    category?: string
+  }
+}
+
+export function getBlogPostHref(post: BlogPostPathSource) {
+  return `/blog/${resolveCategoryPath(post.metadata.category || 'Tech')}/${post.slug}`
 }
 
 function isMissingSQLiteTableError(error: unknown): boolean {
@@ -62,53 +84,114 @@ function isMissingSQLiteTableError(error: unknown): boolean {
   return isMissingSQLiteTableError(maybeError.cause)
 }
 
-function resolveImageFromPayload(payloadDoc: Record<string, any>) {
-  const possibleImageField =
-    payloadDoc.image ||
-    payloadDoc.coverImage ||
-    payloadDoc.cover ||
-    payloadDoc.heroImage
-
-  if (!possibleImageField) {
+function resolveImageFromPayload(payloadValue: unknown): string | undefined {
+  if (!payloadValue) {
     return undefined
   }
 
-  if (typeof possibleImageField === 'string') {
-    return possibleImageField
+  if (typeof payloadValue === 'string') {
+    return payloadValue
   }
 
-  if (typeof possibleImageField === 'object') {
-    const maybeUrl = possibleImageField.url || possibleImageField.filename
-    if (typeof maybeUrl === 'string') {
+  if (typeof payloadValue === 'object') {
+    const maybeUrl = (payloadValue as { url?: unknown; filename?: unknown }).url
+    if (typeof maybeUrl === 'string' && maybeUrl.length > 0) {
       return maybeUrl
+    }
+
+    const maybeFilename = (payloadValue as { filename?: unknown }).filename
+    if (typeof maybeFilename === 'string' && maybeFilename.length > 0) {
+      return maybeFilename
     }
   }
 
   return undefined
 }
 
-function resolveContentFromPayload(payloadDoc: Record<string, any>) {
+function resolvePrimaryCategory(payloadDoc: Record<string, any>): string {
+  const rawCategory =
+    typeof payloadDoc.category === 'object'
+      ? payloadDoc.category.slug ||
+        payloadDoc.category.name ||
+        payloadDoc.category.title
+      : payloadDoc.category
+
+  return normalizeCategory(rawCategory)
+}
+
+function resolveTaxonomyCategories(payloadDoc: Record<string, any>): string[] {
+  const rawCategories = payloadDoc.categories
+  if (!Array.isArray(rawCategories)) {
+    return []
+  }
+
+  return rawCategories
+    .map((item) => {
+      if (!item || typeof item !== 'object') {
+        return undefined
+      }
+
+      const title = (item as { title?: unknown }).title
+      const slug = (item as { slug?: unknown }).slug
+      if (typeof title === 'string' && title.trim().length > 0) {
+        return title.trim()
+      }
+      if (typeof slug === 'string' && slug.trim().length > 0) {
+        return slug.trim()
+      }
+      return undefined
+    })
+    .filter((value): value is string => Boolean(value))
+}
+
+function resolveRichContentFromPayload(payloadDoc: Record<string, any>) {
   const contentCandidates = [
     payloadDoc.content,
-    payloadDoc.body,
-    payloadDoc.markdown,
-    payloadDoc.mdx,
-    payloadDoc.contentMarkdown,
-    payloadDoc.contentMdx,
+    payloadDoc.contentRich,
+    payloadDoc.richText,
   ]
 
   const validContent = contentCandidates.find(
-    (item) => typeof item === 'string'
+    (item) =>
+      Boolean(item) &&
+      typeof item === 'object' &&
+      'root' in (item as Record<string, any>)
   )
 
-  if (typeof validContent === 'string') {
-    return validContent
+  if (validContent && typeof validContent === 'object') {
+    return validContent as Record<string, any>
   }
 
-  return ''
+  return undefined
 }
 
-function toBlogPostFromPayload(payloadDoc: Record<string, any>) {
+function toRelatedBlogPost(value: unknown): RelatedBlogPost | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const doc = value as Record<string, any>
+  const slug =
+    typeof doc.slug === 'string'
+      ? doc.slug
+      : typeof doc.id === 'string' || typeof doc.id === 'number'
+        ? doc.id.toString()
+        : undefined
+
+  if (!slug) {
+    return null
+  }
+
+  return {
+    slug,
+    title: typeof doc.title === 'string' ? doc.title : slug,
+    category: resolvePrimaryCategory(doc),
+  }
+}
+
+function toBlogPostFromPayload(
+  payloadDoc: Record<string, any>
+): BlogPost | null {
   const slug =
     typeof payloadDoc.slug === 'string'
       ? payloadDoc.slug
@@ -120,7 +203,11 @@ function toBlogPostFromPayload(payloadDoc: Record<string, any>) {
     return null
   }
 
-  const content = resolveContentFromPayload(payloadDoc)
+  const richContent = resolveRichContentFromPayload(payloadDoc)
+  if (!richContent) {
+    return null
+  }
+
   const publishedAt =
     payloadDoc.publishedAt ||
     payloadDoc.createdAt ||
@@ -129,30 +216,52 @@ function toBlogPostFromPayload(payloadDoc: Record<string, any>) {
 
   const summary =
     payloadDoc.summary || payloadDoc.excerpt || payloadDoc.description || ''
+  const primaryCategory = resolvePrimaryCategory(payloadDoc)
+  const taxonomyCategories = resolveTaxonomyCategories(payloadDoc)
 
-  const category =
-    typeof payloadDoc.category === 'object'
-      ? payloadDoc.category.slug ||
-        payloadDoc.category.name ||
-        payloadDoc.category.title
-      : payloadDoc.category
+  const seoTitle =
+    typeof payloadDoc.meta?.title === 'string'
+      ? payloadDoc.meta.title
+      : undefined
+  const seoDescription =
+    typeof payloadDoc.meta?.description === 'string'
+      ? payloadDoc.meta.description
+      : undefined
+  const seoImage = resolveImageFromPayload(payloadDoc.meta?.image)
 
   const metadata: BlogMetadata = {
     title: typeof payloadDoc.title === 'string' ? payloadDoc.title : slug,
     publishedAt,
     updatedAt: payloadDoc.updatedAt,
     summary,
-    image: resolveImageFromPayload(payloadDoc),
-    category: normalizeCategory(category),
+    image: resolveImageFromPayload(
+      payloadDoc.image ||
+        payloadDoc.coverImage ||
+        payloadDoc.cover ||
+        payloadDoc.heroImage
+    ),
+    category: primaryCategory,
+    categories: taxonomyCategories,
     ai: payloadDoc.ai,
-    rssImage: payloadDoc.rssImage,
+    rssImage: resolveImageFromPayload(payloadDoc.rssImage),
+    seoTitle,
+    seoDescription,
+    seoImage,
   }
+
+  const relatedPosts = Array.isArray(payloadDoc.relatedPosts)
+    ? payloadDoc.relatedPosts
+        .map((item) => toRelatedBlogPost(item))
+        .filter(
+          (item): item is RelatedBlogPost => Boolean(item) && item.slug !== slug
+        )
+    : []
 
   return {
     metadata,
     slug,
-    tweetIds: extractTweetIds(content),
-    content,
+    richContent,
+    relatedPosts,
   } satisfies BlogPost
 }
 
@@ -169,9 +278,7 @@ type GetBlogPostsOptions = {
   includeDraft?: boolean
 }
 
-export async function getBlogPosts(options: GetBlogPostsOptions = {}) {
-  const includeDraft = options.includeDraft ?? false
-
+async function fetchBlogPosts(includeDraft: boolean): Promise<BlogPost[]> {
   const [{ getPayload }, { default: config }] = await Promise.all([
     import('payload'),
     import('@payload-config'),
@@ -197,7 +304,6 @@ export async function getBlogPosts(options: GetBlogPostsOptions = {}) {
       ...(where ? { where } : {}),
     })
   } catch (error) {
-    // First boot can race before SQLite table creation finishes.
     if (isMissingSQLiteTableError(error)) {
       return []
     }
@@ -211,4 +317,21 @@ export async function getBlogPosts(options: GetBlogPostsOptions = {}) {
 
   sortByPublishedDesc(posts)
   return posts
+}
+
+const getPublishedBlogPosts = unstable_cache(
+  async () => fetchBlogPosts(false),
+  ['blog-posts'],
+  {
+    tags: ['blog-posts'],
+    revalidate: 300,
+  }
+)
+
+export async function getBlogPosts(options: GetBlogPostsOptions = {}) {
+  const includeDraft = options.includeDraft ?? false
+  if (includeDraft) {
+    return fetchBlogPosts(true)
+  }
+  return getPublishedBlogPosts()
 }

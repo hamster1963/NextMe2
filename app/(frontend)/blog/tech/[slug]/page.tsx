@@ -1,4 +1,4 @@
-import { getBlogPosts } from 'app/db/blog'
+import { getBlogPostHref, getBlogPosts } from 'app/db/blog'
 import {
   getOgImageUrl,
   getSiteSettings,
@@ -7,7 +7,7 @@ import {
 import type { Metadata } from 'next'
 import BlogContent from './blog-content'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export async function generateMetadata(props): Promise<Metadata | undefined> {
   const params = await props.params
@@ -21,12 +21,10 @@ export async function generateMetadata(props): Promise<Metadata | undefined> {
     return
   }
 
-  const {
-    title,
-    publishedAt: publishedTime,
-    summary: description,
-    image,
-  } = post.metadata
+  const title = post.metadata.seoTitle || post.metadata.title
+  const publishedTime = post.metadata.publishedAt
+  const description = post.metadata.seoDescription || post.metadata.summary
+  const image = post.metadata.seoImage || post.metadata.image
   const ogImage = getOgImageUrl({ image, siteUrl, title })
 
   return {
@@ -37,7 +35,7 @@ export async function generateMetadata(props): Promise<Metadata | undefined> {
       description,
       type: 'article',
       publishedTime,
-      url: toAbsoluteUrl(`/blog/tech/${post.slug}`, siteUrl),
+      url: toAbsoluteUrl(getBlogPostHref(post), siteUrl),
       images: [
         {
           url: ogImage,

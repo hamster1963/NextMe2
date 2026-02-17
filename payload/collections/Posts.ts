@@ -1,4 +1,23 @@
+import {
+  BlocksFeature,
+  FixedToolbarFeature,
+  HeadingFeature,
+  HorizontalRuleFeature,
+  InlineCodeFeature,
+  InlineToolbarFeature,
+  UploadFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 import type { CollectionConfig } from 'payload'
+import { authenticated } from '../access/authenticated.ts'
+import { authenticatedOrPublished } from '../access/authenticatedOrPublished.ts'
+import { BannerBlock } from '../blocks/BannerBlock.ts'
+import { CodeBlock } from '../blocks/CodeBlock.ts'
+import { MediaBlock } from '../blocks/MediaBlock.ts'
+import {
+  revalidateDeletePost,
+  revalidatePost,
+} from '../hooks/revalidatePost.ts'
 
 const PREVIEW_SECRET = process.env.PAYLOAD_SECRET || 'dev-payload-secret'
 
@@ -44,9 +63,34 @@ function resolvePreviewPath(data?: PostPreviewData | null) {
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
+  access: {
+    create: authenticated,
+    delete: authenticated,
+    read: authenticatedOrPublished,
+    update: authenticated,
+  },
+  defaultPopulate: {
+    title: true,
+    slug: true,
+    category: true,
+    summary: true,
+    publishedAt: true,
+    image: true,
+    meta: {
+      title: true,
+      description: true,
+      image: true,
+    },
+  },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'category', 'publishedAt', 'updatedAt'],
+    defaultColumns: [
+      'title',
+      'category',
+      '_status',
+      'publishedAt',
+      'updatedAt',
+    ],
     livePreview: {
       url: ({ data }) => resolvePreviewPath(data as PostPreviewData),
     },
@@ -55,12 +99,15 @@ export const Posts: CollectionConfig = {
   versions: {
     drafts: {
       autosave: {
-        interval: 500,
+        interval: 200,
       },
+      schedulePublish: true,
     },
+    maxPerDoc: 50,
   },
-  access: {
-    read: () => true,
+  hooks: {
+    afterChange: [revalidatePost],
+    afterDelete: [revalidateDeletePost],
   },
   fields: [
     {
@@ -91,58 +138,162 @@ export const Posts: CollectionConfig = {
       },
     },
     {
-      name: 'category',
-      type: 'select',
-      required: true,
-      defaultValue: 'Tech',
-      options: [
+      type: 'tabs',
+      tabs: [
         {
-          label: 'Tech',
-          value: 'Tech',
+          label: 'Content',
+          fields: [
+            {
+              name: 'summary',
+              type: 'textarea',
+              required: true,
+            },
+            {
+              name: 'image',
+              type: 'upload',
+              relationTo: 'media',
+            },
+            {
+              name: 'content',
+              type: 'richText',
+              required: true,
+              label: false,
+              admin: {
+                description:
+                  'Use the toolbar to insert headings, code blocks, banners, and images.',
+              },
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [
+                    ...rootFeatures,
+                    HeadingFeature({
+                      enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'],
+                    }),
+                    InlineCodeFeature(),
+                    BlocksFeature({
+                      blocks: [BannerBlock, CodeBlock, MediaBlock],
+                    }),
+                    UploadFeature({ enabledCollections: ['media'] }),
+                    HorizontalRuleFeature(),
+                    FixedToolbarFeature(),
+                    InlineToolbarFeature(),
+                  ]
+                },
+              }),
+            },
+          ],
         },
         {
-          label: 'Inside',
-          value: 'Inside',
+          label: 'Meta',
+          fields: [
+            {
+              name: 'category',
+              type: 'select',
+              label: 'Section',
+              required: true,
+              defaultValue: 'Tech',
+              options: [
+                {
+                  label: 'Tech',
+                  value: 'Tech',
+                },
+                {
+                  label: 'Inside',
+                  value: 'Inside',
+                },
+                {
+                  label: 'Daily',
+                  value: 'Daily',
+                },
+              ],
+            },
+            {
+              name: 'categories',
+              type: 'relationship',
+              relationTo: 'categories',
+              hasMany: true,
+            },
+            {
+              name: 'relatedPosts',
+              type: 'relationship',
+              relationTo: 'posts',
+              hasMany: true,
+              filterOptions: ({ id }) => {
+                return {
+                  id: {
+                    not_in: [id],
+                  },
+                }
+              },
+            },
+            {
+              name: 'publishedAt',
+              type: 'date',
+              required: true,
+              defaultValue: () => new Date().toISOString(),
+              admin: {
+                date: {
+                  pickerAppearance: 'dayAndTime',
+                },
+              },
+              hooks: {
+                beforeChange: [
+                  ({ siblingData, value }) => {
+                    if (siblingData._status === 'published' && !value) {
+                      return new Date()
+                    }
+                    return value
+                  },
+                ],
+              },
+            },
+            {
+              name: 'rssImage',
+              type: 'upload',
+              relationTo: 'media',
+            },
+            {
+              name: 'ai',
+              type: 'textarea',
+            },
+          ],
         },
         {
-          label: 'Daily',
-          value: 'Daily',
+          label: 'SEO',
+          fields: [
+            {
+              name: 'meta',
+              type: 'group',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  admin: {
+                    description: 'Optional SEO title (defaults to post title).',
+                  },
+                },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  admin: {
+                    description:
+                      'Optional SEO description (defaults to post summary).',
+                  },
+                },
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  admin: {
+                    description:
+                      'Optional SEO image (defaults to post cover image).',
+                  },
+                },
+              ],
+            },
+          ],
         },
       ],
-    },
-    {
-      name: 'summary',
-      type: 'textarea',
-      required: true,
-    },
-    {
-      name: 'content',
-      type: 'textarea',
-      required: true,
-      admin: {
-        rows: 24,
-        description: 'Support Markdown / MDX string content.',
-      },
-    },
-    {
-      name: 'publishedAt',
-      type: 'date',
-      required: true,
-      defaultValue: () => new Date().toISOString(),
-    },
-    {
-      name: 'image',
-      type: 'upload',
-      relationTo: 'media',
-    },
-    {
-      name: 'rssImage',
-      type: 'upload',
-      relationTo: 'media',
-    },
-    {
-      name: 'ai',
-      type: 'textarea',
     },
   ],
 }

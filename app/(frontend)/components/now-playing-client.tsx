@@ -8,10 +8,12 @@ import NowPlayingStatus from './now-playing-status'
 
 type NowPlayingClientProps = {
   syncMusicData: any
+  dateLocale?: string
+  timeZone?: string
 }
 
 export function NowPlayingClientSpotify(props: NowPlayingClientProps) {
-  const { syncMusicData } = props
+  const { syncMusicData, dateLocale, timeZone } = props
   return (
     <div className="flex flex-col gap-y-1 rounded-[10px] bg-neutral-200/40 p-1 dark:bg-neutral-700/50">
       <div className="relative flex w-full rounded-md border-[0.5px] border-neutral-200 bg-white/80 p-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-none dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-none">
@@ -83,13 +85,15 @@ export function NowPlayingClientSpotify(props: NowPlayingClientProps) {
         play_percent={syncMusicData.play_percent}
         play_state={syncMusicData.player_state}
         timestamp={syncMusicData.timestamp}
+        dateLocale={dateLocale}
+        timeZone={timeZone}
       />
     </div>
   )
 }
 
 export function NowPlayingClientApple(props: NowPlayingClientProps) {
-  const { syncMusicData } = props
+  const { syncMusicData, dateLocale, timeZone } = props
   return (
     <div className="flex flex-col gap-y-1 rounded-[10px] bg-neutral-200/40 p-1 dark:bg-neutral-700/50">
       <div className="relative flex w-full rounded-md border-[0.5px] border-neutral-200 bg-white/80 p-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-none dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-none">
@@ -155,6 +159,8 @@ export function NowPlayingClientApple(props: NowPlayingClientProps) {
         play_percent={syncMusicData.play_percent}
         play_state={syncMusicData.player_state}
         timestamp={syncMusicData.timestamp}
+        dateLocale={dateLocale}
+        timeZone={timeZone}
       />
     </div>
   )

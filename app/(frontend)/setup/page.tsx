@@ -22,7 +22,8 @@ export default async function SetupPage() {
       <p className="text-neutral-600 text-sm dark:text-neutral-300">
         The admin is not initialized yet. Please open the Payload admin and
         create the first administrator account, then configure your site URL in
-        <code>Globals -&gt; Site Settings</code>.
+        <code>Globals -&gt; Site Settings</code> and fill in profile,
+        navigation, blog labels, and footer options.
       </p>
       <div className="flex flex-wrap gap-3">
         <Link

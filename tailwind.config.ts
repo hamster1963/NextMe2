@@ -2,7 +2,7 @@ import typography from '@tailwindcss/typography'
 import tailwindcssAnimate from 'tailwindcss-animate'
 
 export default {
-  content: ['./app/**/*.{ts,tsx}', './content/**/*.mdx', './public/**/*.svg'],
+  content: ['./app/**/*.{ts,tsx}', './public/**/*.svg'],
   theme: {
     extend: {
       animation: {

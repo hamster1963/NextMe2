@@ -3,31 +3,30 @@
 import { cn } from 'lib/utils'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
-import {
-  BeakerIcon,
-  ChatBubbleLeftRightIcon,
-  FireIcon,
-  FolderOpenIcon,
-  HomeIcon,
-} from '@heroicons/react/20/solid'
+import { FireIcon, HomeIcon } from '@heroicons/react/20/solid'
 
-export const siteUrlList = [
-  {
-    name: 'Home',
-    url: '/',
-    icon: HomeIcon,
-  },
-  {
-    name: 'Blog',
-    url: '/blog',
-    icon: FireIcon,
-  },
-]
+type NavProps = {
+  homeLabel: string
+  blogLabel: string
+}
 
-export default function Nav() {
+export default function Nav({ homeLabel, blogLabel }: NavProps) {
   const _nowPath = usePathname()
+  const siteUrlList = [
+    {
+      name: homeLabel,
+      url: '/',
+      icon: HomeIcon,
+    },
+    {
+      name: blogLabel,
+      url: '/blog',
+      icon: FireIcon,
+    },
+  ]
+
   const isActive = useMemo(() => {
     return (url: string) =>
       _nowPath === url || (_nowPath.includes('/blog') && url.includes('/blog'))

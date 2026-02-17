@@ -1,18 +1,17 @@
-import { getBlogPosts } from 'app/db/blog'
+import { getBlogPostHref, getBlogPosts } from 'app/db/blog'
 import { getSiteSettings, toAbsoluteUrl } from 'app/db/site-settings'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 export default async function sitemap() {
   const { siteUrl } = await getSiteSettings()
-  let getPost = await getBlogPosts()
-  getPost = getPost.filter((post) => post.metadata.category === 'Tech')
-  const blogs = getPost.map((post) => ({
-    url: toAbsoluteUrl(`/blog/tech/${post.slug}`, siteUrl),
+  const posts = await getBlogPosts()
+  const blogs = posts.map((post) => ({
+    url: toAbsoluteUrl(getBlogPostHref(post), siteUrl),
     lastModified: post.metadata.publishedAt,
   }))
 
-  const routes = ['', '/blog', '/work', '/darkroom'].map((route) => ({
+  const routes = ['', '/blog', '/blog/inside', '/blog/daily'].map((route) => ({
     url: toAbsoluteUrl(route, siteUrl),
     lastModified: new Date().toISOString().split('T')[0],
   }))

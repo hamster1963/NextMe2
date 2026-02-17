@@ -5,23 +5,33 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 
-const blogTypeList = [
-  {
-    name: 'Blog',
-    url: '/blog',
-  },
-  {
-    name: 'Inside',
-    url: '/blog/inside',
-  },
-  {
-    name: 'Daily',
-    url: '/blog/daily',
-  },
-]
+type TypeSwitchProps = {
+  techLabel: string
+  insideLabel: string
+  dailyLabel: string
+}
 
-export default function TypeSwitch() {
+export default function TypeSwitch({
+  techLabel,
+  insideLabel,
+  dailyLabel,
+}: TypeSwitchProps) {
   const nowPath = usePathname()
+  const blogTypeList = [
+    {
+      name: techLabel,
+      url: '/blog',
+    },
+    {
+      name: insideLabel,
+      url: '/blog/inside',
+    },
+    {
+      name: dailyLabel,
+      url: '/blog/daily',
+    },
+  ]
+
   const isActive = useMemo(() => {
     return (url: string) => nowPath === url
   }, [nowPath])

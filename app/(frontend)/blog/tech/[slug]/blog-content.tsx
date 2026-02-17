@@ -1,10 +1,12 @@
-import avatar from 'app/avatar.webp'
+import defaultAvatar from 'app/avatar.webp'
+import PayloadRichTextContent from 'app/components/payload-richtext'
+import { getBlogPostHref, getBlogPosts } from 'app/db/blog'
+import { slugify } from 'app/lib/slugify'
 import { getPlaceholderColorFromLocal } from 'lib/images'
-import { MDXRemote } from 'next-mdx-remote/rsc'
 import Image from 'next/image'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { customComponents, slugify } from '../../../components/mdx'
-import { getBlogPosts } from '../../../db/blog'
+import { extractHeadingsFromRichContent } from '../../../db/rich-content'
 import {
   getOgImageUrl,
   getSiteSettings,
@@ -19,27 +21,8 @@ interface Heading {
   text: string
 }
 
-function extractHeadings(source: string) {
-  const headings: Heading[] = []
-
-  // Remove fenced code blocks
-  const cleanedSource = source.replace(/```[\s\S]*?```/g, '')
-
-  // Match markdown headings like "## Title"
-  const headingRegex = /^(#{1,6})\s+(.*)$/gm
-  let match = headingRegex.exec(cleanedSource)
-  while (match !== null) {
-    const level = match[1].length // Number of "#" determines heading level
-    let text = match[2].trim()
-
-    // Strip bold markers
-    text = text.replace(/\*\*(.*?)\*\*/g, '$1')
-
-    const id = slugify(text) // Generate heading id via slugify
-    headings.push({ level, id, text })
-    match = headingRegex.exec(cleanedSource)
-  }
-  return headings
+function extractHeadings(richContent: Record<string, any>): Heading[] {
+  return extractHeadingsFromRichContent(richContent, slugify)
 }
 
 type BlogContentProps = {
@@ -52,7 +35,14 @@ export default async function BlogContent({
   includeDraft = false,
 }: BlogContentProps) {
   const getPost = await getBlogPosts({ includeDraft })
-  const { siteUrl } = await getSiteSettings()
+  const {
+    siteUrl,
+    profileName,
+    profileAvatar,
+    profileAvatarAlt,
+    dateLocale,
+    timeZone,
+  } = await getSiteSettings()
 
   if (!getPost) {
     notFound()
@@ -76,7 +66,8 @@ export default async function BlogContent({
     notFound()
   }
 
-  const headings = extractHeadings(post.content)
+  const headings = extractHeadings(post.richContent)
+  const relatedPosts = post.relatedPosts.slice(0, 3)
 
   return (
     <>
@@ -90,16 +81,16 @@ export default async function BlogContent({
             headline: post.metadata.title,
             datePublished: post.metadata.publishedAt,
             dateModified: post.metadata.publishedAt,
-            description: post.metadata.summary,
+            description: post.metadata.seoDescription || post.metadata.summary,
             image: getOgImageUrl({
-              image: post.metadata.image,
+              image: post.metadata.seoImage || post.metadata.image,
               siteUrl,
-              title: post.metadata.title,
+              title: post.metadata.seoTitle || post.metadata.title,
             }),
-            url: toAbsoluteUrl(`/blog/tech/${post.slug}`, siteUrl),
+            url: toAbsoluteUrl(getBlogPostHref(post), siteUrl),
             author: {
               '@type': 'Person',
-              name: 'Hamster1963',
+              name: profileName,
             },
           }),
         }}
@@ -117,7 +108,7 @@ export default async function BlogContent({
             Published
           </p>
           <p className="flex h-5 items-center font-medium text-[13px] text-neutral-800 dark:text-neutral-200">
-            {formatDate(post.metadata.publishedAt)}
+            {formatDate(post.metadata.publishedAt, dateLocale, timeZone)}
           </p>
         </div>
         <div className="flex flex-col gap-1">
@@ -126,19 +117,30 @@ export default async function BlogContent({
           </p>
           <div className="flex items-center gap-1">
             <div className="relative size-[18px] overflow-hidden rounded-full border-[0.5px] border-neutral-200 transition-opacity dark:border-none dark:brightness-90">
-              <Image
-                alt={'Hamster1963'}
-                src={avatar}
-                height={18}
-                width={18}
-                sizes="15vw"
-                placeholder="blur"
-                priority
-                draggable={false}
-              />
+              {profileAvatar ? (
+                <img
+                  alt={profileAvatarAlt}
+                  src={profileAvatar}
+                  height={18}
+                  width={18}
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+              ) : (
+                <Image
+                  alt={profileAvatarAlt}
+                  src={defaultAvatar}
+                  height={18}
+                  width={18}
+                  sizes="15vw"
+                  placeholder="blur"
+                  priority
+                  draggable={false}
+                />
+              )}
             </div>
             <p className="flex h-5 items-center font-medium text-[12px] text-neutral-800 dark:text-neutral-200">
-              Hamster
+              {profileName}
             </p>
           </div>
         </div>
@@ -154,7 +156,7 @@ export default async function BlogContent({
           >
             <img
               className="relative"
-              alt={'Hamster1963'}
+              alt={post.metadata.title}
               src={post.metadata.image}
               width={
                 placeholderImage.metadata?.width
@@ -172,24 +174,45 @@ export default async function BlogContent({
           </div>
         )}
       </div>
-      <article className="prose prose-neutral prose-quoteless dark:prose-invert text-[15px]">
-        <MDXRemote source={post.content} components={customComponents} />
-      </article>
+      <PayloadRichTextContent data={post.richContent} />
+      {relatedPosts.length > 0 && (
+        <section className="mt-12 rounded-xl border border-neutral-200 px-5 py-4 dark:border-neutral-800">
+          <h2 className="font-medium text-base tracking-tight">
+            Related posts
+          </h2>
+          <ul className="mt-3 space-y-2 text-sm">
+            {relatedPosts.map((related) => (
+              <li key={related.slug}>
+                <Link
+                  href={getBlogPostHref({
+                    slug: related.slug,
+                    metadata: { category: related.category },
+                  })}
+                  className="text-neutral-700 transition-colors hover:text-black dark:text-neutral-300 dark:hover:text-white"
+                >
+                  {related.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <TOC headings={headings} />
     </>
   )
 }
 
-function formatDate(date: string) {
+function formatDate(date: string, dateLocale: string, timeZone: string) {
   let dateString = date
   if (!date.includes('T')) {
     dateString = `${date}T00:00:00`
   }
 
-  const fullDate = new Date(dateString).toLocaleString('en-US', {
+  const fullDate = new Date(dateString).toLocaleString(dateLocale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone,
   })
 
   return `${fullDate}`

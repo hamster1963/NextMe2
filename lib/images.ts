@@ -8,7 +8,11 @@ function bufferToBase64(buffer: Buffer): string {
 }
 
 export async function getFileBufferLocal(filepath: string) {
-  const realFilepath = path.join(process.cwd(), 'public', filepath)
+  const normalized = filepath.startsWith('/') ? filepath.slice(1) : filepath
+  const realFilepath = normalized.startsWith('media/')
+    ? path.join(process.cwd(), 'data', normalized)
+    : path.join(process.cwd(), 'public', normalized)
+
   return fs.readFile(realFilepath)
 }
 

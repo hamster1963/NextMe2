@@ -1,9 +1,11 @@
 import { clsx } from 'clsx'
 import Link from 'next/link'
 import { getBlogPosts } from '../../db/blog'
+import { getSiteSettings } from '../../db/site-settings'
 
 export default async function DailyList() {
   let allBlogs = await getBlogPosts()
+  const { dateLocale, timeZone } = await getSiteSettings()
 
   allBlogs = allBlogs.filter((post) => post.metadata.category === 'Daily')
 
@@ -28,7 +30,7 @@ export default async function DailyList() {
             </p>
             <div className="flex items-center gap-1">
               <p className="text-neutral-600 text-xs dark:text-neutral-400">
-                {blogPostDate(post.metadata.publishedAt)}
+                {blogPostDate(post.metadata.publishedAt, dateLocale, timeZone)}
               </p>
             </div>
           </div>
@@ -38,13 +40,14 @@ export default async function DailyList() {
   )
 }
 
-function blogPostDate(date: string) {
+function blogPostDate(date: string, dateLocale: string, timeZone: string) {
   let dateString = date
   if (!dateString.includes('T')) {
     dateString = `${dateString}T00:00:00`
   }
-  return new Date(dateString).toLocaleDateString('zh-CN', {
+  return new Date(dateString).toLocaleDateString(dateLocale, {
     year: 'numeric',
     month: 'long',
+    timeZone,
   })
 }

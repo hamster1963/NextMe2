@@ -1,9 +1,11 @@
 import { getBlogPosts } from 'app/db/blog'
+import { getSiteSettings } from 'app/db/site-settings'
 import { getPlaceholderColorFromLocal } from 'lib/images'
 import InsideListClient from './inside-list-client'
 
 export default async function InsideList() {
   let allBlogs = await getBlogPosts()
+  const { dateLocale, timeZone } = await getSiteSettings()
 
   allBlogs = allBlogs.filter((post) => post.metadata.category === 'Inside')
 
@@ -34,6 +36,8 @@ export default async function InsideList() {
     <InsideListClient
       Blogs={allBlogs}
       placeholderImageBlogMap={placeholderImageBlogMap}
+      dateLocale={dateLocale}
+      timeZone={timeZone}
     />
   )
 }

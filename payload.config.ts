@@ -4,6 +4,7 @@ import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
+import { Categories } from './payload/collections/Categories.ts'
 import { Media } from './payload/collections/Media.ts'
 import { Posts } from './payload/collections/Posts.ts'
 import { Users } from './payload/collections/Users.ts'
@@ -41,9 +42,12 @@ export default buildConfig({
       ],
     },
   },
-  collections: [Users, Media, Posts],
+  collections: [Users, Categories, Media, Posts],
   globals: [SiteSettings],
   editor: lexicalEditor(),
+  graphQL: {
+    disable: true,
+  },
   secret: process.env.PAYLOAD_SECRET || 'dev-payload-secret',
   db: sqliteAdapter({
     client: {
