@@ -4,6 +4,7 @@ import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
+import { migrations } from './migrations/index.ts'
 import { Categories } from './payload/collections/Categories.ts'
 import { Comments } from './payload/collections/Comments.ts'
 import { Media } from './payload/collections/Media.ts'
@@ -13,6 +14,14 @@ import { SiteSettings } from './payload/globals/SiteSettings.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const db = sqliteAdapter({
+  client: {
+    url: process.env.DATABASE_URI || 'file:./payload.db',
+  },
+  push: true,
+  prodMigrations: migrations,
+})
 
 export default buildConfig({
   admin: {
@@ -50,12 +59,7 @@ export default buildConfig({
     disable: true,
   },
   secret: process.env.PAYLOAD_SECRET || 'dev-payload-secret',
-  db: sqliteAdapter({
-    client: {
-      url: process.env.DATABASE_URI || 'file:./payload.db',
-    },
-    push: true,
-  }),
+  db,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
