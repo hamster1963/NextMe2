@@ -36,11 +36,13 @@ export default async function Page() {
         <p className="prose prose-neutral dark:prose-invert text-[13px]">
           {profileTagline}
         </p>
-        <section className={'mb-4 pt-10 font-medium text-md'}>
-          {introLines.map((line) => (
-            <p key={line}>{line}</p>
-          ))}
-        </section>
+        {introLines.length > 0 ? (
+          <section className={'mb-4 pt-10 font-medium text-md'}>
+            {introLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </section>
+        ) : null}
       </div>
     </main>
   )

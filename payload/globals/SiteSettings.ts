@@ -6,6 +6,7 @@ const DEFAULT_SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.SITE_URL ||
   'http://localhost:3052'
+const DEFAULT_INTRO_LINES: { text: string }[] = []
 
 function normalizeSiteUrl(value: string) {
   const trimmed = value.trim()
@@ -111,17 +112,7 @@ export const SiteSettings: GlobalConfig = {
         singular: 'Intro line',
         plural: 'Intro lines',
       },
-      defaultValue: [
-        {
-          text: "👋 Hi, I'm Hamster.",
-        },
-        {
-          text: 'I enjoy writing code and sharing ideas.',
-        },
-        {
-          text: 'I share posts about technology and random thoughts here.',
-        },
-      ],
+      defaultValue: DEFAULT_INTRO_LINES,
       fields: [
         {
           name: 'text',

@@ -39,11 +39,7 @@ const DEFAULT_TIME_ZONE = 'Asia/Shanghai'
 const DEFAULT_PROFILE_NAME = 'Hamster1963'
 const DEFAULT_PROFILE_TAGLINE = 'Developer and amateur guitarist.'
 const DEFAULT_PROFILE_AVATAR_ALT = 'Hamster1963 avatar'
-const DEFAULT_INTRO_LINES = [
-  "👋 Hi, I'm Hamster.",
-  'I enjoy writing code and sharing ideas.',
-  'I share posts about technology and random thoughts here.',
-]
+const DEFAULT_INTRO_LINES: string[] = []
 const DEFAULT_NAV_HOME_LABEL = 'Home'
 const DEFAULT_NAV_BLOG_LABEL = 'Blog'
 const DEFAULT_BLOG_TECH_LABEL = 'Blog'
