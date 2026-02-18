@@ -77,6 +77,20 @@ export default function CommentsPanel({
 
   const commentCount = useMemo(() => comments.length, [comments])
 
+  const onAnonymousChange = (nextAnonymous: boolean) => {
+    setIsAnonymous(nextAnonymous)
+
+    if (nextAnonymous) {
+      setAuthorName(ANONYMOUS_NAME)
+      setAuthorEmail('')
+      return
+    }
+
+    if (authorName === ANONYMOUS_NAME) {
+      setAuthorName('')
+    }
+  }
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setSubmitting(true)
@@ -176,6 +190,33 @@ export default function CommentsPanel({
       className={formPlacement === 'top' ? 'space-y-4' : 'mt-6 space-y-4'}
       onSubmit={onSubmit}
     >
+      <div className="inline-flex rounded-full bg-neutral-100 p-0.5 dark:border dark:border-neutral-800 dark:bg-black">
+        <button
+          type="button"
+          aria-pressed={!isAnonymous}
+          onClick={() => onAnonymousChange(false)}
+          className={`rounded-full px-2 py-1 font-medium text-[10px] transition ${
+            !isAnonymous
+              ? 'bg-white text-black shadow-sm dark:bg-neutral-200 dark:text-neutral-900'
+              : 'text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
+          }`}
+        >
+          Basic
+        </button>
+        <button
+          type="button"
+          aria-pressed={isAnonymous}
+          onClick={() => onAnonymousChange(true)}
+          className={`rounded-full px-2 py-1 font-medium text-[10px] transition ${
+            isAnonymous
+              ? 'bg-white text-black shadow-sm dark:bg-neutral-200 dark:text-neutral-900'
+              : 'text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
+          }`}
+        >
+          Anonymous
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <input
           type="text"
@@ -218,25 +259,7 @@ export default function CommentsPanel({
         className="w-full rounded-lg bg-neutral-100 px-3 py-2.5 text-sm outline-none transition placeholder:text-neutral-400 focus:bg-white dark:bg-neutral-900/80 dark:focus:bg-neutral-900"
       />
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() =>
-            setIsAnonymous((prev) => {
-              const next = !prev
-              if (next) {
-                setAuthorName(ANONYMOUS_NAME)
-                setAuthorEmail('')
-              } else if (authorName === ANONYMOUS_NAME) {
-                setAuthorName('')
-              }
-              return next
-            })
-          }
-          className="rounded-md border border-neutral-300 px-3 py-1.5 font-medium text-sm transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
-        >
-          {isAnonymous ? 'Anonymous On' : 'Anonymous'}
-        </button>
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
           disabled={submitting}
@@ -261,7 +284,7 @@ export default function CommentsPanel({
   )
 
   return (
-    <section className={`mt-14 ${className || ''}`}>
+    <section className={`mt-4 ${className || ''}`}>
       {formPlacement === 'top' ? (
         <>
           {submitForm}

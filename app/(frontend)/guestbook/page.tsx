@@ -20,7 +20,7 @@ export default async function GuestbookPage() {
         Leave a message. Comments are public, and the admin can reply from the
         dashboard.
       </p>
-      <CommentsPanel scope="guestbook" className="mt-8" formPlacement="top" />
+      <CommentsPanel scope="guestbook" formPlacement="top" />
     </section>
   )
 }
