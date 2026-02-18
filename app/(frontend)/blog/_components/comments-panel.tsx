@@ -54,7 +54,7 @@ export default function CommentsPanel({
         params.set('slug', slug)
       }
 
-      const res = await fetch(`/api/comments?${params.toString()}`, {
+      const res = await fetch(`/api/public-comments?${params.toString()}`, {
         method: 'GET',
         cache: 'no-store',
       })
@@ -101,7 +101,7 @@ export default function CommentsPanel({
       const submitName = isAnonymous ? ANONYMOUS_NAME : authorName
       const submitEmail = isAnonymous ? '' : authorEmail
 
-      const res = await fetch('/api/comments', {
+      const res = await fetch('/api/public-comments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
