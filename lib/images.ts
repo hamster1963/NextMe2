@@ -3,6 +3,29 @@ import path from 'node:path'
 import { getPlaiceholder } from 'plaiceholder'
 import sharp from 'sharp'
 
+type PlaceholderColorValue = {
+  src: string
+  metadata: {
+    width: number
+    height: number
+  }
+  placeholder: {
+    r: number
+    g: number
+    b: number
+    hex: string
+  }
+}
+
+type PlaceholderColorCacheEntry = {
+  expiresAt: number
+  value: PlaceholderColorValue
+}
+
+const PLACEHOLDER_COLOR_CACHE_TTL = 5 * 60 * 1000
+const PLACEHOLDER_COLOR_CACHE_MAX = 256
+const placeholderColorCache = new Map<string, PlaceholderColorCacheEntry>()
+
 function bufferToBase64(buffer: Buffer): string {
   return `data:image/png;base64,${buffer.toString('base64')}`
 }
@@ -96,54 +119,111 @@ export async function getPlaceholderBlogImage(filepath: string) {
   }
 }
 
-export async function getPlaceholderColorFromLocal(
-  slug: string,
+function getDefaultPlaceholderColor(filepath: string): PlaceholderColorValue {
+  return {
+    src: filepath,
+    metadata: {
+      width: 1920,
+      height: 1080,
+    },
+    placeholder: {
+      r: 255,
+      g: 255,
+      b: 255,
+      hex: '#ffffff',
+    },
+  }
+}
+
+function readPlaceholderColorCache(
   filepath: string
+): PlaceholderColorValue | null {
+  const cached = placeholderColorCache.get(filepath)
+  if (!cached) {
+    return null
+  }
+
+  if (cached.expiresAt <= Date.now()) {
+    placeholderColorCache.delete(filepath)
+    return null
+  }
+
+  // Refresh insertion order to approximate LRU behavior.
+  placeholderColorCache.delete(filepath)
+  placeholderColorCache.set(filepath, cached)
+  return cached.value
+}
+
+function writePlaceholderColorCache(
+  filepath: string,
+  value: PlaceholderColorValue
 ) {
-  try {
-    const originalBuffer = await getFileBuffer(filepath)
-    const { metadata, color } = await getPlaiceholder(originalBuffer)
-    return {
-      slug: slug,
-      src: filepath,
-      metadata: metadata,
-      placeholder: color,
-    }
-  } catch {
-    return {
-      slug: slug,
-      src: filepath,
-      metadata: {
-        width: 1920,
-        height: 1080,
-      },
-      placeholder: {
-        r: 255,
-        g: 255,
-        b: 255,
-        hex: '#ffffff',
-      },
+  const entry: PlaceholderColorCacheEntry = {
+    expiresAt: Date.now() + PLACEHOLDER_COLOR_CACHE_TTL,
+    value,
+  }
+
+  if (placeholderColorCache.has(filepath)) {
+    placeholderColorCache.delete(filepath)
+  }
+  placeholderColorCache.set(filepath, entry)
+
+  if (placeholderColorCache.size > PLACEHOLDER_COLOR_CACHE_MAX) {
+    const oldestKey = placeholderColorCache.keys().next().value
+    if (oldestKey) {
+      placeholderColorCache.delete(oldestKey)
     }
   }
 }
 
-export async function getPlaceholderColorFromBlog(filepath: string) {
+async function resolvePlaceholderColor(
+  filepath: string
+): Promise<PlaceholderColorValue> {
+  const cached = readPlaceholderColorCache(filepath)
+  if (cached) {
+    return cached
+  }
+
+  let value = getDefaultPlaceholderColor(filepath)
   try {
     const originalBuffer = await getFileBuffer(filepath)
-    const { color } = await getPlaiceholder(originalBuffer)
-    return {
+    const { metadata, color } = await getPlaiceholder(originalBuffer)
+    value = {
       src: filepath,
-      placeholder: color,
-    }
-  } catch {
-    return {
-      src: filepath,
+      metadata: {
+        width: metadata.width || 1920,
+        height: metadata.height || 1080,
+      },
       placeholder: {
-        r: 255,
-        g: 255,
-        b: 255,
-        hex: '#ffffff',
+        r: color.r,
+        g: color.g,
+        b: color.b,
+        hex: color.hex,
       },
     }
+  } catch {}
+
+  writePlaceholderColorCache(filepath, value)
+  return value
+}
+
+export async function getPlaceholderColorFromLocal(
+  slug: string,
+  filepath: string
+) {
+  const placeholderColor = await resolvePlaceholderColor(filepath)
+  return {
+    slug: slug,
+    src: placeholderColor.src,
+    metadata: placeholderColor.metadata,
+    placeholder: placeholderColor.placeholder,
+  }
+}
+
+export async function getPlaceholderColorFromBlog(filepath: string) {
+  const placeholderColor = await resolvePlaceholderColor(filepath)
+  return {
+    src: placeholderColor.src,
+    placeholder: placeholderColor.placeholder,
   }
 }

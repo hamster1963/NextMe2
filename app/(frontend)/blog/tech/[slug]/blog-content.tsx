@@ -1,7 +1,12 @@
 import defaultAvatar from 'app/avatar.webp'
 import CommentsPanel from 'app/blog/_components/comments-panel'
 import PayloadRichTextContent from 'app/components/payload-richtext'
-import { getBlogPostHref, getBlogPosts } from 'app/db/blog'
+import {
+  getBlogPostById,
+  getBlogPostBySlug,
+  getBlogPostHref,
+  getBlogPosts,
+} from 'app/db/blog'
 import { slugify } from 'app/lib/slugify'
 import { getPlaceholderColorFromLocal } from 'lib/images'
 import Image from 'next/image'
@@ -41,7 +46,6 @@ export default async function BlogContent({
   previewDocId,
   previewTitle,
 }: BlogContentProps) {
-  const getPost = await getBlogPosts({ includeDraft })
   const {
     siteUrl,
     profileName,
@@ -51,16 +55,15 @@ export default async function BlogContent({
     timeZone,
   } = await getSiteSettings()
 
-  if (!getPost) {
-    notFound()
+  let post = await getBlogPostBySlug(slug, { includeDraft })
+  if (!post && includeDraft && previewDocId) {
+    post = await getBlogPostById(previewDocId, { includeDraft: true })
   }
-  let post = getPost.find((post) => post.slug === slug)
-  if (!post && previewDocId) {
-    post = getPost.find((item) => item.id === previewDocId)
-  }
-  if (!post && previewTitle) {
+
+  if (!post && includeDraft && previewTitle) {
+    const allPosts = await getBlogPosts({ includeDraft: true })
     const normalizedPreviewTitle = previewTitle.trim().toLowerCase()
-    post = getPost.find(
+    post = allPosts.find(
       (item) =>
         item.metadata.title.trim().toLowerCase() === normalizedPreviewTitle
     )

@@ -2,10 +2,12 @@ services:
   blog:
     image: hamster1963/nextme2:latest
     restart: unless-stopped
+    mem_limit: 1g
     ports:
       - "3052:3052"
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=768 --no-deprecation
       PAYLOAD_SECRET: replace-with-a-secure-secret
       DATABASE_URI: file:/app/data/payload.db
     volumes:

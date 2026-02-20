@@ -7,6 +7,7 @@ Chinese docs: [README.zh-CN.md](./README.zh-CN.md)
 1. Edit `docker-compose.yml`:
 
 - `PAYLOAD_SECRET` (set a secure value)
+- `mem_limit` / `NODE_OPTIONS` (tune memory budget for your host, default heap cap is 768 MB)
 
 2. Start:
 

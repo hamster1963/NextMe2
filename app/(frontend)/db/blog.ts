@@ -323,7 +323,90 @@ async function fetchBlogPosts(includeDraft: boolean): Promise<BlogPost[]> {
   return posts
 }
 
+async function fetchFirstBlogPostByWhere(
+  where: Record<string, any>,
+  includeDraft: boolean
+): Promise<BlogPost | null> {
+  const [{ getPayload }, { default: config }] = await Promise.all([
+    import('payload'),
+    import('@payload-config'),
+  ])
+  const payload = await getPayload({ config })
+
+  let data: { docs?: any[] }
+  try {
+    data = await payload.find({
+      collection: DEFAULT_COLLECTION as any,
+      depth: DEFAULT_DEPTH,
+      draft: includeDraft,
+      limit: 1,
+      where: includeDraft
+        ? where
+        : {
+            and: [
+              where,
+              {
+                _status: {
+                  equals: 'published',
+                },
+              },
+            ],
+          },
+    })
+  } catch (error) {
+    if (isMissingSQLiteTableError(error)) {
+      return null
+    }
+    throw error
+  }
+
+  const firstDoc = Array.isArray(data.docs) ? data.docs[0] : undefined
+  if (!firstDoc) {
+    return null
+  }
+
+  return toBlogPostFromPayload(firstDoc)
+}
+
 export async function getBlogPosts(options: GetBlogPostsOptions = {}) {
   const includeDraft = options.includeDraft ?? false
   return fetchBlogPosts(includeDraft)
+}
+
+type GetBlogPostBySlugOptions = {
+  includeDraft?: boolean
+}
+
+export async function getBlogPostBySlug(
+  slug: string,
+  options: GetBlogPostBySlugOptions = {}
+) {
+  const includeDraft = options.includeDraft ?? false
+  return fetchFirstBlogPostByWhere(
+    {
+      slug: {
+        equals: slug,
+      },
+    },
+    includeDraft
+  )
+}
+
+type GetBlogPostByIdOptions = {
+  includeDraft?: boolean
+}
+
+export async function getBlogPostById(
+  id: string,
+  options: GetBlogPostByIdOptions = {}
+) {
+  const includeDraft = options.includeDraft ?? false
+  return fetchFirstBlogPostByWhere(
+    {
+      id: {
+        equals: id,
+      },
+    },
+    includeDraft
+  )
 }

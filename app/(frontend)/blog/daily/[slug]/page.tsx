@@ -1,4 +1,4 @@
-import { getBlogPostHref, getBlogPosts } from 'app/db/blog'
+import { getBlogPostBySlug, getBlogPostHref } from 'app/db/blog'
 import {
   getOgImageUrl,
   getSiteSettings,
@@ -12,11 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(props): Promise<Metadata | undefined> {
   const params = await props.params
   const { siteUrl } = await getSiteSettings()
-  const getPost = await getBlogPosts()
-  if (!getPost) {
-    return
-  }
-  const post = getPost.find((post) => post.slug === params.slug)
+  const post = await getBlogPostBySlug(params.slug)
   if (!post) {
     return
   }

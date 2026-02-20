@@ -7,6 +7,7 @@ English README: [README.md](./README.md)
 1. 编辑 `docker-compose.yml`：
 
 - `PAYLOAD_SECRET`（设置为安全值）
+- `mem_limit` / `NODE_OPTIONS`（按机器配置调节，默认 Node 堆上限为 768MB）
 
 2. 启动服务：
 

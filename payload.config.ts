@@ -19,7 +19,7 @@ const db = sqliteAdapter({
   client: {
     url: process.env.DATABASE_URI || 'file:./payload.db',
   },
-  push: true,
+  push: process.env.PAYLOAD_PUSH_SCHEMA === 'true',
   prodMigrations: migrations,
 })
 

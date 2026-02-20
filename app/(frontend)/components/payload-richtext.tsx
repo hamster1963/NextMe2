@@ -7,6 +7,7 @@ import {
   type JSXConvertersFunction,
   RichText as PayloadRichText,
 } from '@payloadcms/richtext-lexical/react'
+import { highlight } from 'sugar-high'
 import { slugify } from '../lib/slugify'
 
 type CodeBlockFields = {
@@ -140,10 +141,14 @@ const converters: JSXConvertersFunction<NodeTypes> = ({
     codeBlock: ({ node }) => {
       const language = node.fields?.language || 'plaintext'
       const code = node.fields?.code || ''
+      const highlightedCode = highlight(code)
 
       return (
-        <pre className="my-6 overflow-x-auto rounded-xl bg-stone-900 px-4 py-3 text-stone-100">
-          <code className={`language-${language}`}>{code}</code>
+        <pre className="my-6 overflow-x-auto rounded-xl px-4 py-3">
+          <code
+            className={`language-${language}`}
+            dangerouslySetInnerHTML={{ __html: highlightedCode }}
+          />
         </pre>
       )
     },
